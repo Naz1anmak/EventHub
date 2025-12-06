@@ -1,0 +1,1759 @@
+openapi: 3.0.3
+info:
+  title: EventHub API
+  version: "1.0.0"
+  description: "Documentation \"EventHub\" API v1.0"
+servers:
+  - url: http://localhost:8080
+tags:
+  - name: user
+  - name: user-metadata
+  - name: category
+  - name: project
+  - name: event
+  - name: tag
+paths:
+  /users:
+    post:
+      tags:
+        - user
+      summary: Создать пользователя
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserCreateDto'
+      responses:
+        '201':
+          description: Пользователь успешно создан
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserDto'
+        '400':
+          description: Некорректные данные запроса
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: Пользователь с таким username уже существует
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Внутренняя ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    get:
+      tags:
+        - user
+      summary: Получить список пользователей
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: integer
+            default: 0
+            minimum: 0
+        - in: query
+          name: size
+          schema:
+            type: integer
+            default: 10
+            minimum: 1
+      responses:
+        '200':
+          description: Список пользователей
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PagedUserDtoResponse'
+        '400':
+          description: Некорректные параметры запроса
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Внутренняя ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /users/{id}:
+    get:
+      tags:
+        - user
+      summary: Получить пользователя по id
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Пользователь найден
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserDto'
+        '400':
+          description: Некорректный идентификатор
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Пользователь не найден
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Внутренняя ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    patch:
+      tags:
+        - user
+      summary: Обновить пользователя
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserUpdateDto'
+      responses:
+        '200':
+          description: Пользователь обновлён
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserDto'
+        '400':
+          description: Некорректные данные запроса
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Пользователь не найден
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: Пользователь с таким username уже существует
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Внутренняя ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    delete:
+      tags:
+        - user
+      summary: Удалить пользователя
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Пользователь удалён
+        '400':
+          description: Некорректный идентификатор
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Пользователь не найден
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Внутренняя ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /user-metadata:
+    post:
+      tags:
+        - user-metadata
+      summary: Создать метаданные пользователя
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserMetadataCreateDto'
+      responses:
+        '201':
+          description: Метаданные пользователя успешно созданы
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserMetadataDto'
+        '400':
+          description: Некорректные данные запроса
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Пользователь не найден
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Внутренняя ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    get:
+      tags:
+        - user-metadata
+      summary: Получить список метаданных пользователей
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: integer
+            default: 0
+            minimum: 0
+        - in: query
+          name: size
+          schema:
+            type: integer
+            default: 10
+            minimum: 1
+      responses:
+        '200':
+          description: Список метаданных пользователей
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PagedUserMetadataDtoResponse'
+        '400':
+          description: Некорректные параметры запроса
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Внутренняя ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /user-metadata/{id}:
+    get:
+      tags:
+        - user-metadata
+      summary: Получить метаданные пользователя по id
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Метаданные пользователя найдены
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserMetadataDto'
+        '400':
+          description: Некорректный id
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Метаданные пользователя не найдены
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Внутренняя ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    patch:
+      tags:
+        - user-metadata
+      summary: Обновить метаданные пользователя
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserMetadataUpdateDto'
+      responses:
+        '200':
+          description: Метаданные пользователя обновлены
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserMetadataDto'
+        '400':
+          description: Некорректные данные запроса
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Метаданные пользователя не найдены
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Внутренняя ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    delete:
+      tags:
+        - user-metadata
+      summary: Удалить метаданные пользователя
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Метаданные пользователя удалены
+        '400':
+          description: Некорректный id
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Метаданные пользователя не найдены
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Внутренняя ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /categories:
+    post:
+      tags:
+        - category
+      summary: Создать категорию
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CategoryCreateDto'
+      responses:
+        '201':
+          description: Категория успешно создана
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CategoryDto'
+        '400':
+          description: Некорректные данные запроса
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: Категория с таким именем уже существует
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Внутренняя ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    get:
+      tags:
+        - category
+      summary: Получить список категорий
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: integer
+            default: 0
+            minimum: 0
+        - in: query
+          name: size
+          schema:
+            type: integer
+            default: 10
+            minimum: 1
+      responses:
+        '200':
+          description: Список категорий
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PagedCategoryDtoResponse'
+        '400':
+          description: Некорректные параметры запроса
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Внутренняя ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /categories/{id}:
+    get:
+      tags:
+        - category
+      summary: Получить категорию по id
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Категория найдена
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CategoryDto'
+        '400':
+          description: Некорректный id
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Категория не найдена
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Внутренняя ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    patch:
+      tags:
+        - category
+      summary: Обновить категорию
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CategoryUpdateDto'
+      responses:
+        '200':
+          description: Категория обновлена
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CategoryDto'
+        '400':
+          description: Некорректные данные запроса
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Категория не найдена
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: Категория с таким именем уже существует
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Внутренняя ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    delete:
+      tags:
+        - category
+      summary: Удалить категорию
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Категория удалена
+        '400':
+          description: Некорректный id
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Категория не найдена
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Внутренняя ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /projects:
+    post:
+      tags:
+        - project
+      summary: Создать проект
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProjectCreateDto'
+      responses:
+        '201':
+          description: Проект успешно создан
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProjectDto'
+        '400':
+          description: Некорректные данные запроса
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Внутренняя ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    get:
+      tags:
+        - project
+      summary: Получить список проектов
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: integer
+            default: 0
+            minimum: 0
+        - in: query
+          name: size
+          schema:
+            type: integer
+            default: 10
+            minimum: 1
+      responses:
+        '200':
+          description: Список проектов
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PagedProjectDtoResponse'
+        '400':
+          description: Некорректные параметры запроса
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Внутренняя ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /projects/{id}:
+    get:
+      tags:
+        - project
+      summary: Получить проект по id
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Проект найден
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProjectDto'
+        '400':
+          description: Некорректный id
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Проект не найден
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Внутренняя ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    patch:
+      tags:
+        - project
+      summary: Обновить проект
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProjectUpdateDto'
+      responses:
+        '200':
+          description: Проект обновлён
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProjectDto'
+        '400':
+          description: Некорректные данные запроса
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Проект не найден
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Внутренняя ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    delete:
+      tags:
+        - project
+      summary: Удалить проект
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Проект удалён
+        '400':
+          description: Некорректный id
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Проект не найден
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Внутренняя ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /events:
+    post:
+      tags:
+        - event
+      summary: Создать событие
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EventCreateDto'
+      responses:
+        '201':
+          description: Событие успешно создано
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EventDto'
+        '400':
+          description: Некорректные данные запроса
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Внутренняя ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    get:
+      tags:
+        - event
+      summary: Список событий
+      parameters:
+        - in: query
+          name: userId
+          schema:
+            type: string
+            format: uuid
+          required: false
+          description: "Фильтр: вернуть события только указанного пользователя"
+        - in: query
+          name: page
+          schema:
+            type: integer
+            default: 0
+            minimum: 0
+        - in: query
+          name: size
+          schema:
+            type: integer
+            default: 10
+            minimum: 1
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PagedEventDtoResponse'
+        '400':
+          description: Некорректные параметры запроса
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Пользователь не найден
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Внутренняя ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /events/{id}:
+    get:
+      tags:
+        - event
+      summary: Получить событие по id
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Событие найдено
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EventDto'
+        '400':
+          description: Некорректный идентификатор
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Событие не найдено
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Внутренняя ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    patch:
+      tags:
+        - event
+      summary: Обновить событие
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EventUpdateDto'
+      responses:
+        '200':
+          description: Событие обновлено
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EventDto'
+        '400':
+          description: Некорректные данные запроса
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Событие не найдено
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Внутренняя ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    delete:
+      tags:
+        - event
+      summary: Удалить событие
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Событие удалено
+        '400':
+          description: Некорректный идентификатор
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Событие не найдено
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Внутренняя ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /tags:
+    post:
+      tags:
+        - tag
+      summary: Создать тег
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TagCreateDto'
+      responses:
+        '201':
+          description: Тег успешно создан
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TagDto'
+        '400':
+          description: Некорректные данные запроса
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: Тег с таким именем уже существует
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Внутренняя ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    get:
+      tags:
+        - tag
+      summary: Получить список тегов
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: integer
+            default: 0
+            minimum: 0
+        - in: query
+          name: size
+          schema:
+            type: integer
+            default: 10
+            minimum: 1
+      responses:
+        '200':
+          description: Список тегов
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PagedTagDtoResponse'
+        '400':
+          description: Некорректные параметры запроса
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Внутренняя ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /tags/{id}:
+    get:
+      tags:
+        - tag
+      summary: Получить тег по id
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Тег найден
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TagDto'
+        '400':
+          description: Некорректный id
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Тег не найден
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Внутренняя ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    patch:
+      tags:
+        - tag
+      summary: Обновить тег
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TagUpdateDto'
+      responses:
+        '200':
+          description: Тег обновлён
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TagDto'
+        '400':
+          description: Некорректные данные запроса
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Тег не найден
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: Тег с таким именем уже существует
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Внутренняя ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    delete:
+      tags:
+        - tag
+      summary: Удалить тег
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Тег удалён
+        '400':
+          description: Некорректный id
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Тег не найден
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Внутренняя ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  schemas:
+    # ----- Requests -----
+    EventCreateDto:
+      type: object
+      required: [ title, createdBy ]
+      properties:
+        title:
+          type: string
+          minLength: 3
+          maxLength: 100
+          description: Название события
+          example: "Митап по Java"
+        description:
+          type: string
+          maxLength: 255
+          description: Краткое описание события
+          example: "Встреча для обсуждения новых технологий Java."
+        eventDate:
+          type: string
+          format: date-time
+          description: Дата и время проведения
+          example: "2025-12-10T18:00:00+03:00"
+        location:
+          type: string
+          description: Место проведения
+          example: "Москва, ул. Ленина, 10"
+        categoryId:
+          type: string
+          format: uuid
+          description: Идентификатор категории
+          example: "b1a7e8c2-3d4f-4e2a-9c1a-2b3c4d5e6f7a"
+        createdBy:
+          type: string
+          format: uuid
+          description: Идентификатор пользователя, создавшего событие
+          example: "a1234567-89ab-cdef-0123-456789abcdef"
+        tags:
+          type: array
+          description: Список идентификаторов тегов
+          items:
+            type: string
+            format: uuid
+            example: "c1d2e3f4-5678-1234-abcd-9876543210ab"
+
+    EventUpdateDto:
+      type: object
+      properties:
+        title:
+          type: string
+          maxLength: 100
+          description: Новое название события
+          example: "Spring Boot Workshop"
+        description:
+          type: string
+          maxLength: 255
+          description: Новое описание события
+          example: "Практический семинар по Spring Boot."
+        eventDate:
+          type: string
+          format: date-time
+          description: Новая дата и время проведения
+          example: "2025-12-15T19:00:00+03:00"
+        location:
+          type: string
+          description: Новое место проведения
+          example: "Санкт-Петербург, пр. Невский, 100"
+        categoryId:
+          type: string
+          format: uuid
+          description: Новый идентификатор категории
+          example: "b1a7e8c2-3d4f-4e2a-9c1a-2b3c4d5e6f7a"
+        createdBy:
+          type: string
+          format: uuid
+          description: Новый идентификатор пользователя
+          example: "a1234567-89ab-cdef-0123-456789abcdef"
+        tags:
+          type: array
+          description: Новый список идентификаторов тегов
+          items:
+            type: string
+            format: uuid
+            example: "c1d2e3f4-5678-1234-abcd-9876543210ab"
+        tagUpdateMode:
+          type: string
+          enum: [ REPLACE, ADD, REMOVE ]
+          description: Режим обновления тегов
+          example: "REPLACE"
+
+    CategoryCreateDto:
+      type: object
+      required: [ name ]
+      properties:
+        name:
+          type: string
+          minLength: 3
+          maxLength: 100
+          description: Название категории
+          example: "Технологии"
+        description:
+          type: string
+          maxLength: 255
+          description: Описание категории
+          example: "Категория для технологических событий."
+
+    CategoryUpdateDto:
+      type: object
+      properties:
+        name:
+          type: string
+          maxLength: 100
+          description: Новое название категории
+          example: "Образование"
+        description:
+          type: string
+          maxLength: 255
+          description: Новое описание категории
+          example: "Категория для образовательных мероприятий."
+
+    TagCreateDto:
+      type: object
+      required: [ name ]
+      properties:
+        name:
+          type: string
+          minLength: 3
+          maxLength: 50
+          description: Название тега
+          example: "Java"
+        description:
+          type: string
+          maxLength: 255
+          description: Описание тега
+          example: "Тег для событий, связанных с Java."
+
+    TagUpdateDto:
+      type: object
+      properties:
+        name:
+          type: string
+          maxLength: 50
+          description: Новое название тега
+          example: "Spring"
+        description:
+          type: string
+          maxLength: 255
+          description: Новое описание тега
+          example: "Тег для событий по Spring Framework."
+
+    UserCreateDto:
+      type: object
+      required: [ username ]
+      properties:
+        username:
+          type: string
+          minLength: 3
+          maxLength: 50
+          description: Имя пользователя
+          example: "ivan.petrov"
+        email:
+          type: string
+          format: email
+          description: Email пользователя
+          example: "ivan.petrov@example.com"
+
+    UserUpdateDto:
+      type: object
+      properties:
+        username:
+          type: string
+          maxLength: 50
+          description: Новое имя пользователя
+          example: "petr.ivanov"
+        email:
+          type: string
+          format: email
+          description: Новый email пользователя
+          example: "petr.ivanov@example.com"
+
+    UserMetadataCreateDto:
+      type: object
+      required: [ userId ]
+      properties:
+        userId:
+          type: string
+          format: uuid
+          description: Идентификатор пользователя
+          example: "a1234567-89ab-cdef-0123-456789abcdef"
+        firstName:
+          type: string
+          description: Имя
+          example: "Иван"
+        lastName:
+          type: string
+          description: Фамилия
+          example: "Петров"
+        bio:
+          type: string
+          description: Краткая биография
+          example: "Java-разработчик, спикер митапов."
+        phone:
+          type: string
+          maxLength: 15
+          description: Телефон
+          example: "+7-999-123-45-67"
+
+    UserMetadataUpdateDto:
+      type: object
+      properties:
+        firstName:
+          type: string
+          description: Новое имя
+          example: "Пётр"
+        lastName:
+          type: string
+          description: Новая фамилия
+          example: "Иванов"
+        bio:
+          type: string
+          description: Новая биография
+          example: "Backend-разработчик."
+        phone:
+          type: string
+          maxLength: 15
+          description: Новый телефон
+          example: "+7-888-654-32-10"
+
+    ProjectCreateDto:
+      type: object
+      required: [ name, ownerId ]
+      properties:
+        name:
+          type: string
+          minLength: 3
+          maxLength: 100
+          description: Название проекта
+          example: "EventHub"
+        description:
+          type: string
+          maxLength: 255
+          description: Описание проекта
+          example: "Платформа для организации событий."
+        categoryId:
+          type: string
+          format: uuid
+          description: Идентификатор категории
+          example: "b1a7e8c2-3d4f-4e2a-9c1a-2b3c4d5e6f7a"
+        ownerId:
+          type: string
+          format: uuid
+          description: Идентификатор владельца
+          example: "a1234567-89ab-cdef-0123-456789abcdef"
+
+    ProjectUpdateDto:
+      type: object
+      properties:
+        name:
+          type: string
+          maxLength: 100
+          description: Новое название проекта
+          example: "EventHub Pro"
+        description:
+          type: string
+          maxLength: 255
+          description: Новое описание проекта
+          example: "Расширенная платформа для мероприятий."
+        categoryId:
+          type: string
+          format: uuid
+          description: Новый идентификатор категории
+          example: "b1a7e8c2-3d4f-4e2a-9c1a-2b3c4d5e6f7a"
+        ownerId:
+          type: string
+          format: uuid
+          description: Новый идентификатор владельца
+          example: "a1234567-89ab-cdef-0123-456789abcdef"
+
+    # ----- Responses -----
+    EventDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Идентификатор события
+          example: "b1a7e8c2-3d4f-4e2a-9c1a-2b3c4d5e6f7a"
+        title:
+          type: string
+          description: Название события
+          example: "Митап по Java"
+        description:
+          type: string
+          description: Краткое описание события
+          example: "Встреча для обсуждения новых технологий Java."
+        eventDate:
+          type: string
+          format: date-time
+          description: Дата и время проведения
+          example: "2025-12-10T18:00:00+03:00"
+        location:
+          type: string
+          description: Место проведения
+          example: "Москва, ул. Ленина, 10"
+        category:
+          $ref: '#/components/schemas/CategoryShortDto'
+        createdBy:
+          $ref: '#/components/schemas/UserShortDto'
+        tags:
+          type: array
+          description: Список тегов события
+          items:
+            $ref: '#/components/schemas/TagShortDto'
+
+    TagShortDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Идентификатор тега
+          example: "c1d2e3f4-5678-1234-abcd-9876543210ab"
+        name:
+          type: string
+          description: Название тега
+          example: "Java"
+
+    UserShortDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Идентификатор пользователя
+          example: "a1234567-89ab-cdef-0123-456789abcdef"
+        username:
+          type: string
+          description: Имя пользователя
+          example: "ivan.petrov"
+        email:
+          type: string
+          format: email
+          description: Email пользователя
+          example: "ivan.petrov@example.com"
+
+    CategoryShortDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Идентификатор категории
+          example: "b1a7e8c2-3d4f-4e2a-9c1a-2b3c4d5e6f7a"
+        name:
+          type: string
+          description: Название категории
+          example: "Технологии"
+
+    TagDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Идентификатор тега
+          example: "c1d2e3f4-5678-1234-abcd-9876543210ab"
+        name:
+          type: string
+          description: Название тега
+          example: "Java"
+        description:
+          type: string
+          description: Описание тега
+          example: "Тег для событий, связанных с Java."
+        events:
+          type: array
+          description: Список событий с этим тегом
+          items:
+            $ref: '#/components/schemas/EventShortDto'
+
+    EventShortDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Идентификатор события
+          example: "b1a7e8c2-3d4f-4e2a-9c1a-2b3c4d5e6f7a"
+        title:
+          type: string
+          description: Название события
+          example: "Митап по Java"
+
+    UserDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Идентификатор пользователя
+          example: "a1234567-89ab-cdef-0123-456789abcdef"
+        username:
+          type: string
+          description: Имя пользователя
+          example: "ivan.petrov"
+        email:
+          type: string
+          format: email
+          description: Email пользователя
+          example: "ivan.petrov@example.com"
+        createdAt:
+          type: string
+          format: date-time
+          description: Дата и время создания пользователя
+          example: "2025-12-01T10:00:00+03:00"
+
+    UserMetadataDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Идентификатор метаданных пользователя
+          example: "d1e2f3a4-5678-1234-abcd-9876543210ab"
+        user:
+          $ref: '#/components/schemas/UserShortDto'
+        firstName:
+          type: string
+          description: Имя
+          example: "Иван"
+        lastName:
+          type: string
+          description: Фамилия
+          example: "Петров"
+        bio:
+          type: string
+          description: Краткая биография
+          example: "Java-разработчик, спикер митапов."
+        phone:
+          type: string
+          maxLength: 15
+          description: Телефон
+          example: "+7-999-123-45-67"
+        createdAt:
+          type: string
+          format: date-time
+          description: Дата создания метаданных
+          example: "2025-12-01T10:00:00+03:00"
+        updatedAt:
+          type: string
+          format: date-time
+          description: Дата обновления метаданных
+          example: "2025-12-02T12:00:00+03:00"
+
+    CategoryDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Идентификатор категории
+          example: "b1a7e8c2-3d4f-4e2a-9c1a-2b3c4d5e6f7a"
+        name:
+          type: string
+          description: Название категории
+          example: "Технологии"
+        description:
+          type: string
+          description: Описание категории
+          example: "Категория для технологических событий."
+        createdAt:
+          type: string
+          format: date-time
+          description: Дата создания категории
+          example: "2025-12-01T10:00:00+03:00"
+        updatedAt:
+          type: string
+          format: date-time
+          description: Дата обновления категории
+          example: "2025-12-02T12:00:00+03:00"
+
+    ProjectDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Идентификатор проекта
+          example: "e1f2a3b4-5678-1234-abcd-9876543210ab"
+        name:
+          type: string
+          description: Название проекта
+          example: "EventHub"
+        description:
+          type: string
+          description: Описание проекта
+          example: "Платформа для организации событий."
+        category:
+          $ref: '#/components/schemas/CategoryShortDto'
+        owner:
+          $ref: '#/components/schemas/UserShortDto'
+
+    ErrorResponse:
+      type: object
+      properties:
+        path:
+          type: string
+          description: Путь запроса, вызвавшего ошибку
+          example: "/events"
+        httpMethod:
+          type: string
+          description: HTTP метод запроса
+          example: "POST"
+        statusCode:
+          type: integer
+          description: Код ошибки
+          example: 400
+        errorReason:
+          type: string
+          description: Краткое описание причины ошибки
+          example: "Bad Request"
+        message:
+          type: string
+          description: Описание ошибки
+          example: "Некорректные данные запроса"
+
+    PagedEventDtoResponse:
+      type: object
+      properties:
+        content:
+          type: array
+          items:
+            $ref: '#/components/schemas/EventDto'
+        page:
+          type: integer
+        size:
+          type: integer
+        totalElements:
+          type: integer
+        totalPages:
+          type: integer
+
+    PagedUserDtoResponse:
+      type: object
+      properties:
+        content:
+          type: array
+          items:
+            $ref: '#/components/schemas/UserDto'
+        page:
+          type: integer
+        size:
+          type: integer
+        totalElements:
+          type: integer
+        totalPages:
+          type: integer
+
+    PagedUserMetadataDtoResponse:
+      type: object
+      properties:
+        content:
+          type: array
+          items:
+            $ref: '#/components/schemas/UserMetadataDto'
+        page:
+          type: integer
+        size:
+          type: integer
+        totalElements:
+          type: integer
+        totalPages:
+          type: integer
+
+    PagedCategoryDtoResponse:
+      type: object
+      properties:
+        content:
+          type: array
+          items:
+            $ref: '#/components/schemas/CategoryDto'
+        page:
+          type: integer
+        size:
+          type: integer
+        totalElements:
+          type: integer
+        totalPages:
+          type: integer
+
+    PagedProjectDtoResponse:
+      type: object
+      properties:
+        content:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProjectDto'
+        page:
+          type: integer
+        size:
+          type: integer
+        totalElements:
+          type: integer
+        totalPages:
+          type: integer
+
+    PagedTagDtoResponse:
+      type: object
+      properties:
+        content:
+          type: array
+          items:
+            $ref: '#/components/schemas/TagDto'
+        page:
+          type: integer
+        size:
+          type: integer
+        totalElements:
+          type: integer
+        totalPages:
+          type: integer

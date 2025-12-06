@@ -1,12 +1,12 @@
 spring:
   application:
-    name: spring-test
+    name: event-hub
 
   datasource:
     driver-class-name: org.postgresql.Driver
-    password: 123456
     url: jdbc:postgresql://localhost:5432/postgres
     username: postgres
+    password: 123456
 
   jpa:
     hibernate:
@@ -15,7 +15,9 @@ spring:
       hibernate:
         show_sql: true
         format_sql: true
-        default_schema: spring-test
+        default_schema: event_hub
 
   flyway:
-    default-schema: spring-test
+    enabled: true
+    baseline-on-migrate: true
+    default-schema: event_hub
