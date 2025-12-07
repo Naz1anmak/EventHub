@@ -46,9 +46,9 @@ public class ErrorHandler {
     }
 
     @ExceptionHandler(ValidationException.class)
-    @ResponseStatus(HttpStatus.CONFLICT)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handleValidationException(ValidationException exception, HttpServletRequest request) {
-        return buildResponse(HttpStatus.CONFLICT, exception, request);
+        return buildResponse(HttpStatus.BAD_REQUEST, exception, request);
     }
 
     @ExceptionHandler(ConstraintViolationException.class)

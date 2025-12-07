@@ -10,6 +10,7 @@ import java.util.UUID;
 
 public interface ProjectRepository extends JpaRepository<Project, UUID> {
 
+    @Override
     @EntityGraph(attributePaths = {"category", "owner"})
     Page<Project> findAll(Pageable pageable);
 }

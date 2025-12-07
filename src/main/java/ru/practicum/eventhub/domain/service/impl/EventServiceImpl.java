@@ -57,7 +57,7 @@ public class EventServiceImpl implements EventService {
         Event event = eventMapper.fromCreateDto(dto, category, user, tags);
         event = eventRepository.save(event);
 
-        log.debug("Created event: {}", event);
+        log.info("Создано событие с id={}", event.getId());
         return eventMapper.toDto(event);
     }
 
@@ -126,23 +126,15 @@ public class EventServiceImpl implements EventService {
             if (dto.tagUpdateMode() != null) {
                 switch (dto.tagUpdateMode()) {
                     case REPLACE -> event.setTags(tags);
-                    case ADD -> {
-                        Set<Tag> currentTags = event.getTags();
-                        currentTags.addAll(tags);
-                        event.setTags(currentTags);
-                    }
-                    case REMOVE -> {
-                        Set<Tag> currentTags = event.getTags();
-                        currentTags.removeAll(tags);
-                        event.setTags(currentTags);
-                    }
+                    case ADD -> tags.forEach(event::addTag);
+                    case REMOVE -> tags.forEach(event::removeTag);
                 }
             } else {
                 event.setTags(tags);
             }
         }
 
-        eventMapper.updateEventFromDto(dto, event, category, user, event.getTags());
+        eventMapper.updateEventFromDto(dto, event, category, user);
         event = eventRepository.save(event);
 
         log.info("Обновлено событие с id={}", id);

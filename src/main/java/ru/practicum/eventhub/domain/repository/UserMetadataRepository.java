@@ -10,6 +10,7 @@ import java.util.UUID;
 
 public interface UserMetadataRepository extends JpaRepository<UserMetadata, UUID> {
 
+    @Override
     @EntityGraph(attributePaths = "user")
     Page<UserMetadata> findAll(Pageable pageable);
 }

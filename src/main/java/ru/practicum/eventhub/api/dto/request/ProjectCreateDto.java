@@ -1,12 +1,14 @@
 package ru.practicum.eventhub.api.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
 import java.util.UUID;
 
 public record ProjectCreateDto(
 
+        @NotBlank(message = "Name must not be blank")
         @Size(min = 3, max = 100, message = "Name must be between 3 and 100 characters")
         String name,
 
@@ -15,7 +17,7 @@ public record ProjectCreateDto(
 
         UUID categoryId,
 
-        @NotBlank(message = "OwnerId must not be blank")
+        @NotNull(message = "OwnerId must not be null")
         UUID ownerId
 ) {
 }

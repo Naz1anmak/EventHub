@@ -13,6 +13,7 @@ import ru.practicum.eventhub.api.dto.response.CategoryDto;
 import ru.practicum.eventhub.api.mapper.CategoryMapper;
 import ru.practicum.eventhub.domain.dto.PagedResponse;
 import ru.practicum.eventhub.domain.exception.ConflictException;
+import ru.practicum.eventhub.domain.exception.NotFoundException;
 import ru.practicum.eventhub.domain.model.Category;
 import ru.practicum.eventhub.domain.repository.CategoryRepository;
 import ru.practicum.eventhub.domain.service.CategoryService;
@@ -34,10 +35,11 @@ public class CategoryServiceImpl implements CategoryService {
         try {
             category = categoryRepository.save(category);
         } catch (DataIntegrityViolationException exception) {
+            log.error(exception.getMessage(), exception);
             throw new ConflictException("Категория с именем '" + dto.name() + "' уже существует.");
         }
 
-        log.info("Создана категория: {}", category);
+        log.info("Создана категория с id={}", category.getId());
         return categoryMapper.toDto(category);
     }
 
@@ -46,8 +48,8 @@ public class CategoryServiceImpl implements CategoryService {
     public PagedResponse<CategoryDto> getCategories(Pageable pageable) {
         Page<Category> categoryPage = categoryRepository.findAll(pageable);
 
-        log.info("Отправлена страница категорий: номер={}, размер={}",
-                categoryPage.getNumber(), categoryPage.getSize());
+        log.info("Отправлена страница категорий: страница={}, размер={}",
+                pageable.getPageNumber(), pageable.getPageSize());
         return new PagedResponse<>(
                 categoryPage.getContent().stream().map(categoryMapper::toDto).toList(),
                 categoryPage.getNumber(),
@@ -74,6 +76,7 @@ public class CategoryServiceImpl implements CategoryService {
         try {
             category = categoryRepository.save(category);
         } catch (DataIntegrityViolationException exception) {
+            log.error(exception.getMessage(), exception);
             throw new ConflictException("Категория с именем '" + dto.name() + "' уже существует.");
         }
 
@@ -92,7 +95,6 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     public Category getCategoryByIdOrThrow(UUID id) {
         return categoryRepository.findById(id)
-                .orElseThrow(() -> new ConflictException("Категория с id=" + id + " не найдена.")
-                );
+                .orElseThrow(() -> new NotFoundException("Категория с id=" + id + " не найдена."));
     }
 }

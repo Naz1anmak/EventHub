@@ -9,6 +9,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.OffsetDateTime;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
@@ -41,4 +42,8 @@ public class Tag {
 
     @ManyToMany(mappedBy = "tags")
     private Set<Event> events = new HashSet<>();
+
+    public Set<Event> getEvents() {
+        return Collections.unmodifiableSet(events);
+    }
 }

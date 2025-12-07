@@ -1,6 +1,8 @@
 package ru.practicum.eventhub.api.controller;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.PositiveOrZero;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
@@ -29,8 +31,8 @@ public class EventController {
 
     @GetMapping
     public PagedResponse<EventDto> getEvents(@RequestParam(required = false) UUID userId,
-                                             @RequestParam(defaultValue = "0") int page,
-                                             @RequestParam(defaultValue = "10") int size) {
+                                             @RequestParam(defaultValue = "0") @PositiveOrZero int page,
+                                             @RequestParam(defaultValue = "10") @Positive int size) {
         if (userId != null) {
             return eventService.getEventsByUser(userId, PageRequest.of(page, size));
         }

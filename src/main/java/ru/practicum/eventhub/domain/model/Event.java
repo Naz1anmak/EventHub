@@ -2,6 +2,7 @@ package ru.practicum.eventhub.domain.model;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
+import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
@@ -9,9 +10,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.OffsetDateTime;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 @Entity
 @Table(name = "events")
@@ -44,6 +43,7 @@ public class Event {
     @JoinColumn(name = "created_by", nullable = false)
     private User createdBy;
 
+    @Getter(AccessLevel.NONE)
     @ManyToMany
     @JoinTable(
             name = "event_tags",
@@ -51,6 +51,27 @@ public class Event {
             inverseJoinColumns = @JoinColumn(name = "tag_id")
     )
     private Set<Tag> tags = new HashSet<>();
+
+    public Set<Tag> getTags() {
+        return Collections.unmodifiableSet(tags);
+    }
+
+    public void addTag(Tag tag) {
+        if (tag == null) return;
+        tags.add(tag);
+    }
+
+    public void removeTag(Tag tag) {
+        if (tag == null) return;
+        tags.remove(tag);
+    }
+
+    public void setTags(Collection<Tag> newTags) {
+        this.tags.clear();
+        if (newTags != null) {
+            newTags.forEach(this::addTag);
+        }
+    }
 
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)

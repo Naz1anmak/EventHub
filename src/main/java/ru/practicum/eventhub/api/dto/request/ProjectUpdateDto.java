@@ -13,7 +13,6 @@ public record ProjectUpdateDto(
         String description,
 
         UUID categoryId,
-
         UUID ownerId
 ) {
 }

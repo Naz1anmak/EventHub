@@ -35,10 +35,11 @@ public class TagServiceImpl implements TagService {
         try {
             tag = tagRepository.save(tag);
         } catch (DataIntegrityViolationException exception) {
+            log.error(exception.getMessage(), exception);
             throw new ConflictException("Тег с именем '" + dto.name() + "' уже существует.");
         }
 
-        log.info("Создан тег: {}", tag);
+        log.info("Создан тег с id={}", tag.getId());
         return tagMapper.toDto(tag);
     }
 
@@ -74,6 +75,7 @@ public class TagServiceImpl implements TagService {
         try {
             tag = tagRepository.save(tag);
         } catch (DataIntegrityViolationException exception) {
+            log.error(exception.getMessage(), exception);
             throw new ConflictException("Тег с именем '" + dto.name() + "' уже существует.");
         }
 
@@ -92,7 +94,6 @@ public class TagServiceImpl implements TagService {
     @Override
     public Tag getTagByIdOrThrow(UUID id) {
         return tagRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Тег с ID '" + id + "' не найден.")
-                );
+                .orElseThrow(() -> new NotFoundException("Тег с ID '" + id + "' не найден."));
     }
 }

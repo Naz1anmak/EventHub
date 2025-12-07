@@ -1,13 +1,13 @@
 package ru.practicum.eventhub.api.dto.request;
 
-import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
 import java.util.UUID;
 
 public record UserMetadataCreateDto(
 
-        @NotBlank(message = "UserId field must not be blank")
+        @NotNull(message = "UserId field must not be null")
         UUID userId,
 
         String firstName,

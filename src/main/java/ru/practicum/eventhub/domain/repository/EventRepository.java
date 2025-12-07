@@ -11,6 +11,7 @@ import java.util.UUID;
 
 public interface EventRepository extends JpaRepository<Event, UUID> {
 
+    @Override
     @EntityGraph(attributePaths = {"category", "createdBy", "tags"})
     Page<Event> findAll(Pageable pageable);
 

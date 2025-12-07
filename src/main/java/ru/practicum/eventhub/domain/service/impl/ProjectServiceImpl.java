@@ -45,7 +45,7 @@ public class ProjectServiceImpl implements ProjectService {
         Project project = projectMapper.fromCreateDto(dto, category, owner);
         project = projectRepository.save(project);
 
-        log.info("Создан проект: {}", project);
+        log.info("Создан проект с id={}", project.getId());
         return projectMapper.toDto(project);
     }
 
@@ -76,7 +76,11 @@ public class ProjectServiceImpl implements ProjectService {
     @Transactional
     public ProjectDto updateProject(UUID id, ProjectUpdateDto dto) {
         Project project = getProjectByIdOrThrow(id);
-        User owner = userService.getUserByIdOrThrow(dto.ownerId());
+
+        User owner = null;
+        if (dto.ownerId() != null) {
+            owner = userService.getUserByIdOrThrow(dto.ownerId());
+        }
 
         Category category = null;
         if (dto.categoryId() != null) {
@@ -99,7 +103,7 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     private Project getProjectByIdOrThrow(UUID id) {
-        return projectRepository.findById(id).orElseThrow(() ->
-                new NotFoundException("Проект с id=" + id + " не найден"));
+        return projectRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Проект с id=" + id + " не найден"));
     }
 }

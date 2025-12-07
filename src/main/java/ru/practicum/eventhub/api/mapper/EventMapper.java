@@ -28,9 +28,9 @@ public interface EventMapper {
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
+    @Mapping(target = "tags", ignore = true)
     @Mapping(target = "description", source = "updateDto.description")
     @Mapping(target = "category", source = "category")
     @Mapping(target = "createdBy", source = "createdBy")
-    @Mapping(target = "tags", source = "tags")
-    void updateEventFromDto(EventUpdateDto updateDto, @MappingTarget Event event, Category category, User createdBy, Set<Tag> tags);
+    void updateEventFromDto(EventUpdateDto updateDto, @MappingTarget Event event, Category category, User createdBy);
 }

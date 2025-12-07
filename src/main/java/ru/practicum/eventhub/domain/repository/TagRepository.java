@@ -10,6 +10,7 @@ import java.util.UUID;
 
 public interface TagRepository extends JpaRepository<Tag, UUID> {
 
+    @Override
     @EntityGraph(attributePaths = {"events"})
     Page<Tag> findAll(Pageable pageable);
 }

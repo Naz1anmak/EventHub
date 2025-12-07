@@ -37,7 +37,7 @@ public class UserMetadataServiceImpl implements UserMetadataService {
         UserMetadata userMetadata = userMetadataMapper.fromCreateDto(dto, user);
         userMetadata = userMetadataRepository.save(userMetadata);
 
-        log.info("Создана user-metadata: {}", userMetadata);
+        log.info("Создана user-metadata с id={} для user c id={}", userMetadata.getId(), userId);
         return userMetadataMapper.toDto(userMetadata);
     }
 
@@ -46,8 +46,8 @@ public class UserMetadataServiceImpl implements UserMetadataService {
     public PagedResponse<UserMetadataDto> getUserMetadata(Pageable pageable) {
         Page<UserMetadata> userMetadataPage = userMetadataRepository.findAll(pageable);
 
-        log.info("Получена страница user-metadata: номер={}, размер={}",
-                userMetadataPage.getNumber(), userMetadataPage.getSize());
+        log.info("Получена страница user-metadata: страница={}, размер={}",
+                pageable.getPageNumber(), pageable.getPageSize());
         return new PagedResponse<>(
                 userMetadataPage.getContent().stream().map(userMetadataMapper::toDto).toList(),
                 userMetadataPage.getNumber(),

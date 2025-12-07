@@ -34,10 +34,11 @@ public class UserServiceImpl implements UserService {
         try {
             user = userRepository.save(user);
         } catch (DataIntegrityViolationException exception) {
+            log.error(exception.getMessage(), exception);
             throw new ConflictException("Пользователь с username '" + dto.username() + "' уже существует");
         }
 
-        log.info("Добавлен новый пользователь {}", user);
+        log.info("Создан новый пользователь с id={}", user.getId());
         return userMapper.toDto(user);
     }
 
@@ -46,7 +47,8 @@ public class UserServiceImpl implements UserService {
     public PagedResponse<UserDto> getUsers(Pageable pageable) {
         Page<User> usersPage = userRepository.findAll(pageable);
 
-        log.info("Получена страница пользователей: номер={}, размер={}", usersPage.getNumber(), usersPage.getSize());
+        log.info("Получена страница пользователей: страница={}, размер={}",
+                pageable.getPageNumber(), pageable.getPageSize());
         return new PagedResponse<>(
                 usersPage.getContent().stream().map(userMapper::toDto).toList(),
                 usersPage.getNumber(),
@@ -72,6 +74,7 @@ public class UserServiceImpl implements UserService {
         try {
             user = userRepository.save(user);
         } catch (DataIntegrityViolationException exception) {
+            log.error(exception.getMessage(), exception);
             throw new ConflictException("Пользователь с username '" + dto.username() + "' уже существует");
         }
 

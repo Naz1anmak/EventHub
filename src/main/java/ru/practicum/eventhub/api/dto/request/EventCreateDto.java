@@ -2,6 +2,7 @@ package ru.practicum.eventhub.api.dto.request;
 
 import jakarta.validation.constraints.FutureOrPresent;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
 import java.time.OffsetDateTime;
@@ -10,6 +11,7 @@ import java.util.UUID;
 
 public record EventCreateDto(
 
+        @NotBlank(message = "Title must not be blank")
         @Size(min = 3, max = 100, message = "Title must be between 3 and 100 characters")
         String title,
 
@@ -22,7 +24,7 @@ public record EventCreateDto(
         String location,
         UUID categoryId,
 
-        @NotBlank(message = "CreatedBy field must not be blank")
+        @NotNull(message = "CreatedBy field must not be null")
         UUID createdBy,
 
         Set<UUID> tags
