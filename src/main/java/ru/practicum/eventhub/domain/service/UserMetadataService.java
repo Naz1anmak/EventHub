@@ -10,13 +10,13 @@ import ru.practicum.eventhub.domain.dto.PagedResponse;
 import java.util.UUID;
 
 public interface UserMetadataService {
-    UserMetadataDto createUserMetadata(@Valid UserMetadataCreateDto dto);
+    UserMetadataDto createForUser(UUID userId, @Valid UserMetadataCreateDto dto);
 
     PagedResponse<UserMetadataDto> getUserMetadata(Pageable pageable);
 
-    UserMetadataDto getUserMetadataById(UUID id);
+    UserMetadataDto getByUserId(UUID userId);
 
-    UserMetadataDto updateUserMetadata(UUID id, @Valid UserMetadataUpdateDto dto);
+    UserMetadataDto updateByUserId(UUID userId, @Valid UserMetadataUpdateDto dto);
 
-    void deleteUserMetadata(UUID id);
+    void deleteByUserId(UUID userId);
 }

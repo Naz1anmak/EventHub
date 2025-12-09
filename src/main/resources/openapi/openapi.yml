@@ -13,7 +13,7 @@ tags:
   - name: event
   - name: tag
 paths:
-  /users:
+  /users/v1/api:
     post:
       tags:
         - user
@@ -85,7 +85,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
-  /users/{id}:
+  /users/v1/api/{id}:
     get:
       tags:
         - user
@@ -203,42 +203,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
 
-  /user-metadata:
-    post:
-      tags:
-        - user-metadata
-      summary: Создать метаданные пользователя
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/UserMetadataCreateDto'
-      responses:
-        '201':
-          description: Метаданные пользователя успешно созданы
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/UserMetadataDto'
-        '400':
-          description: Некорректные данные запроса
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-        '404':
-          description: Пользователь не найден
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-        '500':
-          description: Внутренняя ошибка сервера
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
+  /users/v1/api/metadata:
     get:
       tags:
         - user-metadata
@@ -275,11 +240,53 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
-  /user-metadata/{id}:
+  /users/v1/api/{id}/metadata:
+    post:
+      tags:
+        - user-metadata
+      summary: Создать метаданные пользователя для указанного userId
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserMetadataCreateDto'
+      responses:
+        '201':
+          description: Метаданные пользователя успешно созданы
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserMetadataDto'
+        '400':
+          description: Некорректные данные запроса
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Пользователь не найден
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Внутренняя ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
     get:
       tags:
         - user-metadata
-      summary: Получить метаданные пользователя по id
+      summary: Получить метаданные пользователя по userId
       parameters:
         - in: path
           name: id
@@ -315,7 +322,7 @@ paths:
     patch:
       tags:
         - user-metadata
-      summary: Обновить метаданные пользователя
+      summary: Обновить метаданные пользователя по userId
       parameters:
         - in: path
           name: id
@@ -357,7 +364,7 @@ paths:
     delete:
       tags:
         - user-metadata
-      summary: Удалить метаданные пользователя
+      summary: Удалить метаданные пользователя по userId
       parameters:
         - in: path
           name: id
@@ -387,7 +394,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
 
-  /categories:
+  /categories/v1/api:
     post:
       tags:
         - category
@@ -459,7 +466,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
-  /categories/{id}:
+  /categories/v1/api/{id}:
     get:
       tags:
         - category
@@ -577,7 +584,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
 
-  /projects:
+  /categories/v1/api/projects:
     post:
       tags:
         - project
@@ -643,7 +650,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
-  /projects/{id}:
+  /categories/v1/api/projects/{id}:
     get:
       tags:
         - project
@@ -755,7 +762,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
 
-  /events:
+  /events/v1/api:
     post:
       tags:
         - event
@@ -834,7 +841,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
-  /events/{id}:
+  /events/v1/api/{id}:
     get:
       tags:
         - event
@@ -946,7 +953,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
 
-  /tags:
+  /events/v1/api/tags:
     post:
       tags:
         - tag
@@ -1018,7 +1025,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
-  /tags/{id}:
+  /events/v1/api/tags/{id}:
     get:
       tags:
         - tag
@@ -1141,7 +1148,7 @@ components:
     # ----- Requests -----
     EventCreateDto:
       type: object
-      required: [ title, createdBy ]
+      required: [ title, createdBy, categoryId ]
       properties:
         title:
           type: string
@@ -1318,13 +1325,7 @@ components:
 
     UserMetadataCreateDto:
       type: object
-      required: [ userId ]
       properties:
-        userId:
-          type: string
-          format: uuid
-          description: Идентификатор пользователя
-          example: "a1234567-89ab-cdef-0123-456789abcdef"
         firstName:
           type: string
           description: Имя
@@ -1366,7 +1367,7 @@ components:
 
     ProjectCreateDto:
       type: object
-      required: [ name, ownerId ]
+      required: [ name, ownerId, categoryId ]
       properties:
         name:
           type: string

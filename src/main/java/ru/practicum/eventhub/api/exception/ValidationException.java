@@ -1,4 +1,4 @@
-package ru.practicum.eventhub.domain.exception;
+package ru.practicum.eventhub.api.exception;
 
 public class ValidationException extends RuntimeException {
     public ValidationException(String message) {

@@ -10,10 +10,10 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.eventhub.api.dto.request.CategoryCreateDto;
 import ru.practicum.eventhub.api.dto.request.CategoryUpdateDto;
 import ru.practicum.eventhub.api.dto.response.CategoryDto;
+import ru.practicum.eventhub.api.exception.ConflictException;
+import ru.practicum.eventhub.api.exception.NotFoundException;
 import ru.practicum.eventhub.api.mapper.CategoryMapper;
 import ru.practicum.eventhub.domain.dto.PagedResponse;
-import ru.practicum.eventhub.domain.exception.ConflictException;
-import ru.practicum.eventhub.domain.exception.NotFoundException;
 import ru.practicum.eventhub.domain.model.Category;
 import ru.practicum.eventhub.domain.repository.CategoryRepository;
 import ru.practicum.eventhub.domain.service.CategoryService;
@@ -50,13 +50,7 @@ public class CategoryServiceImpl implements CategoryService {
 
         log.info("Отправлена страница категорий: страница={}, размер={}",
                 pageable.getPageNumber(), pageable.getPageSize());
-        return new PagedResponse<>(
-                categoryPage.getContent().stream().map(categoryMapper::toDto).toList(),
-                categoryPage.getNumber(),
-                categoryPage.getSize(),
-                categoryPage.getTotalElements(),
-                categoryPage.getTotalPages()
-        );
+        return PagedResponse.from(categoryPage, categoryMapper::toDto);
     }
 
     @Override

@@ -1,4 +1,4 @@
-package ru.practicum.eventhub.domain.exception;
+package ru.practicum.eventhub.api.exception;
 
 public record ErrorResponse(
         String path,

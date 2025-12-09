@@ -1,4 +1,4 @@
-package ru.practicum.eventhub.domain.exception;
+package ru.practicum.eventhub.api.exception;
 
 public class ConflictException extends RuntimeException {
     public ConflictException(String message) {

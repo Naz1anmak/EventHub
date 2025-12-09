@@ -2,6 +2,7 @@ package ru.practicum.eventhub.api.dto.request;
 
 import jakarta.validation.constraints.FutureOrPresent;
 import jakarta.validation.constraints.Size;
+import ru.practicum.eventhub.domain.model.TagUpdateMode;
 
 import java.time.OffsetDateTime;
 import java.util.Set;
@@ -24,9 +25,4 @@ public record EventUpdateDto(
         Set<UUID> tags,
         TagUpdateMode tagUpdateMode
 ) {
-    public enum TagUpdateMode {
-        REPLACE,
-        ADD,
-        REMOVE
-    }
 }

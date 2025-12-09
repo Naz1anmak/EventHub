@@ -22,6 +22,8 @@ public record EventCreateDto(
         OffsetDateTime eventDate,
 
         String location,
+
+        @NotNull(message = "CategoryId field must not be null")
         UUID categoryId,
 
         @NotNull(message = "CreatedBy field must not be null")

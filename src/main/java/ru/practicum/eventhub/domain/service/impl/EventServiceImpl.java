@@ -9,9 +9,9 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.eventhub.api.dto.request.EventCreateDto;
 import ru.practicum.eventhub.api.dto.request.EventUpdateDto;
 import ru.practicum.eventhub.api.dto.response.EventDto;
+import ru.practicum.eventhub.api.exception.NotFoundException;
 import ru.practicum.eventhub.api.mapper.EventMapper;
 import ru.practicum.eventhub.domain.dto.PagedResponse;
-import ru.practicum.eventhub.domain.exception.NotFoundException;
 import ru.practicum.eventhub.domain.model.Category;
 import ru.practicum.eventhub.domain.model.Event;
 import ru.practicum.eventhub.domain.model.Tag;
@@ -22,7 +22,6 @@ import ru.practicum.eventhub.domain.service.EventService;
 import ru.practicum.eventhub.domain.service.TagService;
 import ru.practicum.eventhub.domain.service.UserService;
 
-import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
@@ -39,19 +38,12 @@ public class EventServiceImpl implements EventService {
     @Override
     @Transactional
     public EventDto createEvent(EventCreateDto dto) {
-        Category category = null;
-        if (dto.categoryId() != null) {
-            category = categoryService.getCategoryByIdOrThrow(dto.categoryId());
-        }
-
+        Category category = categoryService.getCategoryByIdOrThrow(dto.categoryId());
         User user = userService.getUserByIdOrThrow(dto.createdBy());
 
-        Set<Tag> tags = new HashSet<>();
-        if (dto.tags() != null) {
-            for (UUID tagId : dto.tags()) {
-                Tag tag = tagService.getTagByIdOrThrow(tagId);
-                tags.add(tag);
-            }
+        Set<Tag> tags = Set.of();
+        if (dto.tags() != null && !dto.tags().isEmpty()) {
+            tags = tagService.getTagsByIdsOrThrow(dto.tags());
         }
 
         Event event = eventMapper.fromCreateDto(dto, category, user, tags);
@@ -67,13 +59,7 @@ public class EventServiceImpl implements EventService {
         Page<Event> eventPage = eventRepository.findAll(pageable);
 
         log.info("Запрошены события: страница {}, размер {}", pageable.getPageNumber(), pageable.getPageSize());
-        return new PagedResponse<>(
-                eventPage.getContent().stream().map(eventMapper::toDto).toList(),
-                eventPage.getNumber(),
-                eventPage.getSize(),
-                eventPage.getTotalElements(),
-                eventPage.getTotalPages()
-        );
+        return PagedResponse.from(eventPage, eventMapper::toDto);
     }
 
     @Override
@@ -84,13 +70,7 @@ public class EventServiceImpl implements EventService {
 
         log.info("Запрошены события пользователя {}: страница {}, размер {}",
                 userId, pageable.getPageNumber(), pageable.getPageSize());
-        return new PagedResponse<>(
-                eventPage.getContent().stream().map(eventMapper::toDto).toList(),
-                eventPage.getNumber(),
-                eventPage.getSize(),
-                eventPage.getTotalElements(),
-                eventPage.getTotalPages()
-        );
+        return PagedResponse.from(eventPage, eventMapper::toDto);
     }
 
     @Override
@@ -117,18 +97,10 @@ public class EventServiceImpl implements EventService {
         }
 
         if (dto.tags() != null) {
-            Set<Tag> tags = new HashSet<>();
-            for (UUID tagId : dto.tags()) {
-                Tag tag = tagService.getTagByIdOrThrow(tagId);
-                tags.add(tag);
-            }
+            Set<Tag> tags = dto.tags().isEmpty() ? Set.of() : tagService.getTagsByIdsOrThrow(dto.tags());
 
             if (dto.tagUpdateMode() != null) {
-                switch (dto.tagUpdateMode()) {
-                    case REPLACE -> event.setTags(tags);
-                    case ADD -> tags.forEach(event::addTag);
-                    case REMOVE -> tags.forEach(event::removeTag);
-                }
+                dto.tagUpdateMode().apply(event, tags);
             } else {
                 event.setTags(tags);
             }
@@ -149,7 +121,7 @@ public class EventServiceImpl implements EventService {
         log.info("Удалено событие с id={}", id);
     }
 
-    private Event getEventByIdOrThrow(UUID id) {
+    public Event getEventByIdOrThrow(UUID id) {
         return eventRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Событие с id=" + id + " не найдено"));
     }

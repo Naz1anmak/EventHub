@@ -9,9 +9,9 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.eventhub.api.dto.request.ProjectCreateDto;
 import ru.practicum.eventhub.api.dto.request.ProjectUpdateDto;
 import ru.practicum.eventhub.api.dto.response.ProjectDto;
+import ru.practicum.eventhub.api.exception.NotFoundException;
 import ru.practicum.eventhub.api.mapper.ProjectMapper;
 import ru.practicum.eventhub.domain.dto.PagedResponse;
-import ru.practicum.eventhub.domain.exception.NotFoundException;
 import ru.practicum.eventhub.domain.model.Category;
 import ru.practicum.eventhub.domain.model.Project;
 import ru.practicum.eventhub.domain.model.User;
@@ -34,13 +34,8 @@ public class ProjectServiceImpl implements ProjectService {
     @Override
     @Transactional
     public ProjectDto createProject(ProjectCreateDto dto) {
-        Category category = null;
-        User owner;
-
-        if (dto.categoryId() != null) {
-            category = categoryService.getCategoryByIdOrThrow(dto.categoryId());
-        }
-        owner = userService.getUserByIdOrThrow(dto.ownerId());
+        Category category = categoryService.getCategoryByIdOrThrow(dto.categoryId());
+        User owner = userService.getUserByIdOrThrow(dto.ownerId());
 
         Project project = projectMapper.fromCreateDto(dto, category, owner);
         project = projectRepository.save(project);
@@ -55,13 +50,7 @@ public class ProjectServiceImpl implements ProjectService {
         Page<Project> projectPage = projectRepository.findAll(pageable);
 
         log.info("Получены проекты: страница {}, размер {}", pageable.getPageNumber(), pageable.getPageSize());
-        return new PagedResponse<>(
-                projectPage.getContent().stream().map(projectMapper::toDto).toList(),
-                projectPage.getNumber(),
-                projectPage.getSize(),
-                projectPage.getTotalElements(),
-                projectPage.getTotalPages()
-        );
+        return PagedResponse.from(projectPage, projectMapper::toDto);
     }
 
     @Override
@@ -102,7 +91,7 @@ public class ProjectServiceImpl implements ProjectService {
         log.info("Удален проект с id={}", id);
     }
 
-    private Project getProjectByIdOrThrow(UUID id) {
+    public Project getProjectByIdOrThrow(UUID id) {
         return projectRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Проект с id=" + id + " не найден"));
     }

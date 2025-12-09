@@ -9,9 +9,9 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.eventhub.api.dto.request.UserMetadataCreateDto;
 import ru.practicum.eventhub.api.dto.request.UserMetadataUpdateDto;
 import ru.practicum.eventhub.api.dto.response.UserMetadataDto;
+import ru.practicum.eventhub.api.exception.NotFoundException;
 import ru.practicum.eventhub.api.mapper.UserMetadataMapper;
 import ru.practicum.eventhub.domain.dto.PagedResponse;
-import ru.practicum.eventhub.domain.exception.NotFoundException;
 import ru.practicum.eventhub.domain.model.User;
 import ru.practicum.eventhub.domain.model.UserMetadata;
 import ru.practicum.eventhub.domain.repository.UserMetadataRepository;
@@ -30,8 +30,7 @@ public class UserMetadataServiceImpl implements UserMetadataService {
 
     @Override
     @Transactional
-    public UserMetadataDto createUserMetadata(UserMetadataCreateDto dto) {
-        UUID userId = dto.userId();
+    public UserMetadataDto createForUser(UUID userId, UserMetadataCreateDto dto) {
         User user = userService.getUserByIdOrThrow(userId);
 
         UserMetadata userMetadata = userMetadataMapper.fromCreateDto(dto, user);
@@ -48,44 +47,41 @@ public class UserMetadataServiceImpl implements UserMetadataService {
 
         log.info("Получена страница user-metadata: страница={}, размер={}",
                 pageable.getPageNumber(), pageable.getPageSize());
-        return new PagedResponse<>(
-                userMetadataPage.getContent().stream().map(userMetadataMapper::toDto).toList(),
-                userMetadataPage.getNumber(),
-                userMetadataPage.getSize(),
-                userMetadataPage.getTotalElements(),
-                userMetadataPage.getTotalPages()
-        );
+        return PagedResponse.from(userMetadataPage, userMetadataMapper::toDto);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public UserMetadataDto getUserMetadataById(UUID id) {
-        log.info("Запрошена user-metadata с id={}", id);
-        return userMetadataMapper.toDto(getUserMetadataByIdOrThrow(id));
-    }
-
-    @Override
-    @Transactional
-    public UserMetadataDto updateUserMetadata(UUID id, UserMetadataUpdateDto dto) {
-        UserMetadata userMetadata = getUserMetadataByIdOrThrow(id);
-
-        userMetadataMapper.updateFromDto(dto, userMetadata);
-        userMetadata = userMetadataRepository.save(userMetadata);
-
-        log.info("Обновлена user-metadata c id={}", id);
+    public UserMetadataDto getByUserId(UUID userId) {
+        UserMetadata userMetadata = getMetadataByUserIdOrThrow(userId);
+        UUID metadataId = userMetadata.getId();
+        log.info("Запрошена user-metadata с id={}, userId={}", metadataId, userId);
         return userMetadataMapper.toDto(userMetadata);
     }
 
     @Override
     @Transactional
-    public void deleteUserMetadata(UUID id) {
-        getUserMetadataByIdOrThrow(id);
-        userMetadataRepository.deleteById(id);
-        log.info("Удалена user-metadata с id={}", id);
+    public UserMetadataDto updateByUserId(UUID userId, UserMetadataUpdateDto dto) {
+        UserMetadata userMetadata = getMetadataByUserIdOrThrow(userId);
+
+        userMetadataMapper.updateFromDto(dto, userMetadata);
+        userMetadata = userMetadataRepository.save(userMetadata);
+
+        log.info("Обновлена user-metadata c id={}, userId={}", userMetadata.getId(), userId);
+        return userMetadataMapper.toDto(userMetadata);
     }
 
-    private UserMetadata getUserMetadataByIdOrThrow(UUID id) {
-        return userMetadataRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("User-metadata c id=" + id + " не найдена"));
+    @Override
+    @Transactional
+    public void deleteByUserId(UUID userId) {
+        UserMetadata userMetadata = getMetadataByUserIdOrThrow(userId);
+        UUID metadataId = userMetadata.getId();
+        userMetadataRepository.deleteById(metadataId);
+        log.info("Удалена user-metadata c id={}, userId={}", metadataId, userId);
+    }
+
+    public UserMetadata getMetadataByUserIdOrThrow(UUID userId) {
+        return userMetadataRepository.findByUserId(userId)
+                .orElseThrow(() -> new NotFoundException("User-metadata c userId=" + userId + " не найдена"));
     }
 }

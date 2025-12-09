@@ -15,6 +15,7 @@ public record ProjectCreateDto(
         @Size(max = 255, message = "Description must be up to 255 characters")
         String description,
 
+        @NotNull(message = "CategoryId must not be null")
         UUID categoryId,
 
         @NotNull(message = "OwnerId must not be null")

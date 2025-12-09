@@ -10,15 +10,18 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.eventhub.api.dto.request.TagCreateDto;
 import ru.practicum.eventhub.api.dto.request.TagUpdateDto;
 import ru.practicum.eventhub.api.dto.response.TagDto;
+import ru.practicum.eventhub.api.exception.ConflictException;
+import ru.practicum.eventhub.api.exception.NotFoundException;
 import ru.practicum.eventhub.api.mapper.TagMapper;
 import ru.practicum.eventhub.domain.dto.PagedResponse;
-import ru.practicum.eventhub.domain.exception.ConflictException;
-import ru.practicum.eventhub.domain.exception.NotFoundException;
 import ru.practicum.eventhub.domain.model.Tag;
 import ru.practicum.eventhub.domain.repository.TagRepository;
 import ru.practicum.eventhub.domain.service.TagService;
 
+import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -49,13 +52,7 @@ public class TagServiceImpl implements TagService {
         Page<Tag> tagPage = tagRepository.findAll(pageable);
 
         log.info("Запрошены теги: страница {}, размер {}", pageable.getPageNumber(), pageable.getPageSize());
-        return new PagedResponse<>(
-                tagPage.getContent().stream().map(tagMapper::toDto).toList(),
-                tagPage.getNumber(),
-                tagPage.getSize(),
-                tagPage.getTotalElements(),
-                tagPage.getTotalPages()
-        );
+        return PagedResponse.from(tagPage, tagMapper::toDto);
     }
 
     @Override
@@ -95,5 +92,23 @@ public class TagServiceImpl implements TagService {
     public Tag getTagByIdOrThrow(UUID id) {
         return tagRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Тег с ID '" + id + "' не найден."));
+    }
+
+    @Override
+    public Set<Tag> getTagsByIdsOrThrow(Set<UUID> ids) {
+        if (ids == null || ids.isEmpty()) {
+            return Set.of();
+        }
+
+        Set<Tag> tags = new HashSet<>(tagRepository.findAllById(ids));
+        if (tags.size() != ids.size()) {
+            Set<UUID> foundIds = tags.stream().map(Tag::getId).collect(Collectors.toSet());
+            Set<UUID> missing = new HashSet<>(ids);
+            missing.removeAll(foundIds);
+            log.error("Не найдены теги c id={}", missing);
+            throw new NotFoundException("Не найдены теги c id=" + missing);
+        }
+
+        return tags;
     }
 }

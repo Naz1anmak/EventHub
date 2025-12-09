@@ -9,19 +9,24 @@ import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.eventhub.api.dto.request.UserCreateDto;
+import ru.practicum.eventhub.api.dto.request.UserMetadataCreateDto;
+import ru.practicum.eventhub.api.dto.request.UserMetadataUpdateDto;
 import ru.practicum.eventhub.api.dto.request.UserUpdateDto;
 import ru.practicum.eventhub.api.dto.response.UserDto;
+import ru.practicum.eventhub.api.dto.response.UserMetadataDto;
 import ru.practicum.eventhub.domain.dto.PagedResponse;
+import ru.practicum.eventhub.domain.service.UserMetadataService;
 import ru.practicum.eventhub.domain.service.UserService;
 
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/users")
+@RequestMapping("/users/v1/api")
 @Validated
 @RequiredArgsConstructor
 public class UserController {
     private final UserService userService;
+    private final UserMetadataService userMetadataService;
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
@@ -31,8 +36,8 @@ public class UserController {
 
     @GetMapping
     public PagedResponse<UserDto> getUsers(
-            @RequestParam(defaultValue = "0") @PositiveOrZero int page,
-            @RequestParam(defaultValue = "10") @Positive int size
+            @RequestParam(defaultValue = "0") @PositiveOrZero Integer page,
+            @RequestParam(defaultValue = "10") @Positive Integer size
     ) {
         return userService.getUsers(PageRequest.of(page, size));
     }
@@ -51,5 +56,37 @@ public class UserController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteUser(@PathVariable UUID id) {
         userService.deleteUser(id);
+    }
+
+    @PostMapping("/{id}/metadata")
+    @ResponseStatus(HttpStatus.CREATED)
+    public UserMetadataDto createMetadataForUser(@PathVariable("id") UUID userId,
+                                                 @Valid @RequestBody UserMetadataCreateDto dto) {
+        return userMetadataService.createForUser(userId, dto);
+    }
+
+    @GetMapping("/metadata")
+    public PagedResponse<UserMetadataDto> getUserMetadata(
+            @RequestParam(defaultValue = "0") @PositiveOrZero Integer page,
+            @RequestParam(defaultValue = "10") @Positive Integer size
+    ) {
+        return userMetadataService.getUserMetadata(PageRequest.of(page, size));
+    }
+
+    @GetMapping("/{id}/metadata")
+    public UserMetadataDto getMetadataByUserId(@PathVariable("id") UUID userId) {
+        return userMetadataService.getByUserId(userId);
+    }
+
+    @PatchMapping("/{id}/metadata")
+    public UserMetadataDto updateMetadataForUser(@PathVariable("id") UUID userId,
+                                                 @Valid @RequestBody UserMetadataUpdateDto dto) {
+        return userMetadataService.updateByUserId(userId, dto);
+    }
+
+    @DeleteMapping("/{id}/metadata")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteMetadataForUser(@PathVariable("id") UUID userId) {
+        userMetadataService.deleteByUserId(userId);
     }
 }

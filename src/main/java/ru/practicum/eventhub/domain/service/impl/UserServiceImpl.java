@@ -10,10 +10,10 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.eventhub.api.dto.request.UserCreateDto;
 import ru.practicum.eventhub.api.dto.request.UserUpdateDto;
 import ru.practicum.eventhub.api.dto.response.UserDto;
+import ru.practicum.eventhub.api.exception.ConflictException;
+import ru.practicum.eventhub.api.exception.NotFoundException;
 import ru.practicum.eventhub.api.mapper.UserMapper;
 import ru.practicum.eventhub.domain.dto.PagedResponse;
-import ru.practicum.eventhub.domain.exception.ConflictException;
-import ru.practicum.eventhub.domain.exception.NotFoundException;
 import ru.practicum.eventhub.domain.model.User;
 import ru.practicum.eventhub.domain.repository.UserRepository;
 import ru.practicum.eventhub.domain.service.UserService;
@@ -49,13 +49,7 @@ public class UserServiceImpl implements UserService {
 
         log.info("Получена страница пользователей: страница={}, размер={}",
                 pageable.getPageNumber(), pageable.getPageSize());
-        return new PagedResponse<>(
-                usersPage.getContent().stream().map(userMapper::toDto).toList(),
-                usersPage.getNumber(),
-                usersPage.getSize(),
-                usersPage.getTotalElements(),
-                usersPage.getTotalPages()
-        );
+        return PagedResponse.from(usersPage, userMapper::toDto);
     }
 
     @Override

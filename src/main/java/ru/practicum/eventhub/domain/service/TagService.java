@@ -7,6 +7,7 @@ import ru.practicum.eventhub.api.dto.response.TagDto;
 import ru.practicum.eventhub.domain.dto.PagedResponse;
 import ru.practicum.eventhub.domain.model.Tag;
 
+import java.util.Set;
 import java.util.UUID;
 
 public interface TagService {
@@ -21,4 +22,6 @@ public interface TagService {
     void deleteTag(UUID id);
 
     Tag getTagByIdOrThrow(UUID id);
+
+    Set<Tag> getTagsByIdsOrThrow(Set<UUID> ids);
 }

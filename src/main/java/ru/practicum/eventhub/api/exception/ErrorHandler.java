@@ -1,4 +1,4 @@
-package ru.practicum.eventhub.domain.exception;
+package ru.practicum.eventhub.api.exception;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;

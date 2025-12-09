@@ -31,7 +31,7 @@ create table if not exists projects (
   id uuid primary key default gen_random_uuid(),
   name text not null,
   description text,
-  category_id uuid references categories(id) on delete set null,
+  category_id uuid not null references categories(id),
   owner_id uuid not null references users(id),
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
@@ -44,7 +44,7 @@ create table if not exists events (
   description text,
   event_date timestamptz,
   location text,
-  category_id uuid references categories(id) on delete set null,
+  category_id uuid not null references categories(id),
   created_by uuid not null references users(id),
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
