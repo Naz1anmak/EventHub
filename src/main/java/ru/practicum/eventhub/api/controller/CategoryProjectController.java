@@ -35,56 +35,56 @@ public class CategoryProjectController {
     }
 
     @GetMapping
-    public PagedResponse<CategoryDto> getCategories(
-            @RequestParam(defaultValue = "0") @PositiveOrZero Integer page,
-            @RequestParam(defaultValue = "10") @Positive Integer size
-    ) {
+    public PagedResponse<CategoryDto> getCategories(@RequestParam(defaultValue = "0") @PositiveOrZero Integer page,
+                                                    @RequestParam(defaultValue = "10") @Positive Integer size) {
         return categoryService.getCategories(PageRequest.of(page, size));
     }
 
-    @GetMapping("/{id}")
-    public CategoryDto getCategoryById(@PathVariable UUID id) {
-        return categoryService.getCategoryById(id);
+    @GetMapping("/{categoryId}")
+    public CategoryDto getCategoryById(@PathVariable UUID categoryId) {
+        return categoryService.getCategoryById(categoryId);
     }
 
-    @PatchMapping("/{id}")
-    public CategoryDto updateCategory(@PathVariable UUID id, @Valid @RequestBody CategoryUpdateDto dto) {
-        return categoryService.updateCategory(id, dto);
+    @PatchMapping("/{categoryId}")
+    public CategoryDto updateCategory(@PathVariable UUID categoryId, @Valid @RequestBody CategoryUpdateDto dto) {
+        return categoryService.updateCategory(categoryId, dto);
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/{categoryId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteCategory(@PathVariable UUID id) {
-        categoryService.deleteCategory(id);
+    public void deleteCategory(@PathVariable UUID categoryId) {
+        categoryService.deleteCategory(categoryId);
     }
 
-    @PostMapping("/projects")
+    @PostMapping("/{categoryId}/projects")
     @ResponseStatus(HttpStatus.CREATED)
-    public ProjectDto createProject(@Valid @RequestBody ProjectCreateDto dto) {
-        return projectService.createProject(dto);
+    public ProjectDto createProjectForCategory(@PathVariable UUID categoryId,
+                                               @Valid @RequestBody ProjectCreateDto dto) {
+        return projectService.createForCategory(categoryId, dto);
     }
 
-    @GetMapping("/projects")
-    public PagedResponse<ProjectDto> getProjects(
-            @RequestParam(defaultValue = "0") @PositiveOrZero Integer page,
-            @RequestParam(defaultValue = "10") @Positive Integer size
-    ) {
-        return projectService.getProjects(PageRequest.of(page, size));
+    @GetMapping("/{categoryId}/projects")
+    public PagedResponse<ProjectDto> getProjectsByCategory(@PathVariable UUID categoryId,
+                                                           @RequestParam(defaultValue = "0") @PositiveOrZero Integer page,
+                                                           @RequestParam(defaultValue = "10") @Positive Integer size) {
+        return projectService.getProjectsByCategory(categoryId, PageRequest.of(page, size));
     }
 
-    @GetMapping("/projects/{id}")
-    public ProjectDto getProjectById(@PathVariable UUID id) {
-        return projectService.getProjectById(id);
+    @GetMapping("/{categoryId}/projects/{projectId}")
+    public ProjectDto getProjectByCategory(@PathVariable UUID categoryId, @PathVariable UUID projectId) {
+        return projectService.getProjectByCategory(categoryId, projectId);
     }
 
-    @PatchMapping("/projects/{id}")
-    public ProjectDto updateProject(@PathVariable UUID id, @Valid @RequestBody ProjectUpdateDto dto) {
-        return projectService.updateProject(id, dto);
+    @PatchMapping("/{categoryId}/projects/{projectId}")
+    public ProjectDto updateProjectForCategory(@PathVariable UUID categoryId,
+                                               @PathVariable UUID projectId,
+                                               @Valid @RequestBody ProjectUpdateDto dto) {
+        return projectService.updateForCategory(categoryId, projectId, dto);
     }
 
-    @DeleteMapping("/projects/{id}")
+    @DeleteMapping("/{categoryId}/projects/{projectId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteProject(@PathVariable UUID id) {
-        projectService.deleteProject(id);
+    public void deleteProjectForCategory(@PathVariable UUID categoryId, @PathVariable UUID projectId) {
+        projectService.deleteForCategory(categoryId, projectId);
     }
 }

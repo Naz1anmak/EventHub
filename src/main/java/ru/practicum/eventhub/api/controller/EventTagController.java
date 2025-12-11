@@ -44,20 +44,20 @@ public class EventTagController {
         return eventService.getEvents(PageRequest.of(page, size));
     }
 
-    @GetMapping("/{id}")
-    public EventDto getEventById(@PathVariable UUID id) {
-        return eventService.getEventById(id);
+    @GetMapping("/{eventId}")
+    public EventDto getEventById(@PathVariable UUID eventId) {
+        return eventService.getEventById(eventId);
     }
 
-    @PatchMapping("/{id}")
-    public EventDto updateEvent(@PathVariable UUID id, @Valid @RequestBody EventUpdateDto dto) {
-        return eventService.updateEvent(id, dto);
+    @PatchMapping("/{eventId}")
+    public EventDto updateEvent(@PathVariable UUID eventId, @Valid @RequestBody EventUpdateDto dto) {
+        return eventService.updateEvent(eventId, dto);
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/{eventId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteEvent(@PathVariable UUID id) {
-        eventService.deleteEvent(id);
+    public void deleteEvent(@PathVariable UUID eventId) {
+        eventService.deleteEvent(eventId);
     }
 
     @PostMapping("/tags")
@@ -67,26 +67,34 @@ public class EventTagController {
     }
 
     @GetMapping("/tags")
-    public PagedResponse<TagDto> getTags(
-            @RequestParam(defaultValue = "0") @PositiveOrZero Integer page,
-            @RequestParam(defaultValue = "10") @Positive Integer size
-    ) {
+    public PagedResponse<TagDto> getTags(@RequestParam(defaultValue = "0") @PositiveOrZero Integer page,
+                                         @RequestParam(defaultValue = "10") @Positive Integer size) {
         return tagService.getTags(PageRequest.of(page, size));
     }
 
-    @GetMapping("/tags/{id}")
-    public TagDto getTagById(@PathVariable UUID id) {
-        return tagService.getTagById(id);
+    @GetMapping("/{eventId}/tags")
+    public PagedResponse<TagDto> getTagsByEvent(@PathVariable UUID eventId,
+                                                @RequestParam(defaultValue = "0") @PositiveOrZero Integer page,
+                                                @RequestParam(defaultValue = "10") @Positive Integer size) {
+        return tagService.getTagsByEvent(eventId, PageRequest.of(page, size));
     }
 
-    @PatchMapping("/tags/{id}")
-    public TagDto updateTag(@PathVariable UUID id, @Valid @RequestBody TagUpdateDto dto) {
-        return tagService.updateTag(id, dto);
+    @GetMapping("/{eventId}/tags/{tagId}")
+    public TagDto getTagByEvent(@PathVariable UUID eventId, @PathVariable UUID tagId) {
+        return tagService.getTagByEvent(eventId, tagId);
     }
 
-    @DeleteMapping("/tags/{id}")
+    @PatchMapping("/{eventId}/tags/{tagId}")
+    public TagDto updateTagForEvent(@PathVariable UUID eventId,
+                                    @PathVariable UUID tagId,
+                                    @Valid @RequestBody TagUpdateDto dto) {
+        return tagService.updateForEvent(eventId, tagId, dto);
+    }
+
+    @DeleteMapping("/{eventId}/tags/{tagId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteTag(@PathVariable UUID id) {
-        tagService.deleteTag(id);
+    public void deleteTagForEvent(@PathVariable UUID eventId,
+                                  @PathVariable UUID tagId) {
+        tagService.deleteForEvent(eventId, tagId);
     }
 }

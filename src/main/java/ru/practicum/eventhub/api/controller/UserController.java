@@ -42,25 +42,25 @@ public class UserController {
         return userService.getUsers(PageRequest.of(page, size));
     }
 
-    @GetMapping("/{id}")
-    public UserDto getUserById(@PathVariable UUID id) {
-        return userService.getUserById(id);
+    @GetMapping("/{userId}")
+    public UserDto getUserById(@PathVariable UUID userId) {
+        return userService.getUserById(userId);
     }
 
-    @PatchMapping("/{id}")
-    public UserDto updateUser(@PathVariable UUID id, @Valid @RequestBody UserUpdateDto dto) {
-        return userService.updateUser(id, dto);
+    @PatchMapping("/{userId}")
+    public UserDto updateUser(@PathVariable UUID userId, @Valid @RequestBody UserUpdateDto dto) {
+        return userService.updateUser(userId, dto);
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/{userId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteUser(@PathVariable UUID id) {
-        userService.deleteUser(id);
+    public void deleteUser(@PathVariable UUID userId) {
+        userService.deleteUser(userId);
     }
 
-    @PostMapping("/{id}/metadata")
+    @PostMapping("/{userId}/metadata")
     @ResponseStatus(HttpStatus.CREATED)
-    public UserMetadataDto createMetadataForUser(@PathVariable("id") UUID userId,
+    public UserMetadataDto createMetadataForUser(@PathVariable UUID userId,
                                                  @Valid @RequestBody UserMetadataCreateDto dto) {
         return userMetadataService.createForUser(userId, dto);
     }
@@ -73,20 +73,20 @@ public class UserController {
         return userMetadataService.getUserMetadata(PageRequest.of(page, size));
     }
 
-    @GetMapping("/{id}/metadata")
-    public UserMetadataDto getMetadataByUserId(@PathVariable("id") UUID userId) {
+    @GetMapping("/{userId}/metadata")
+    public UserMetadataDto getMetadataByUserId(@PathVariable UUID userId) {
         return userMetadataService.getByUserId(userId);
     }
 
-    @PatchMapping("/{id}/metadata")
-    public UserMetadataDto updateMetadataForUser(@PathVariable("id") UUID userId,
+    @PatchMapping("/{userId}/metadata")
+    public UserMetadataDto updateMetadataForUser(@PathVariable UUID userId,
                                                  @Valid @RequestBody UserMetadataUpdateDto dto) {
         return userMetadataService.updateByUserId(userId, dto);
     }
 
-    @DeleteMapping("/{id}/metadata")
+    @DeleteMapping("/{userId}/metadata")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteMetadataForUser(@PathVariable("id") UUID userId) {
+    public void deleteMetadataForUser(@PathVariable UUID userId) {
         userMetadataService.deleteByUserId(userId);
     }
 }

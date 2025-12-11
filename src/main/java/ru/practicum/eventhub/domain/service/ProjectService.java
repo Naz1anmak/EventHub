@@ -9,13 +9,13 @@ import ru.practicum.eventhub.domain.dto.PagedResponse;
 import java.util.UUID;
 
 public interface ProjectService {
-    ProjectDto createProject(ProjectCreateDto dto);
+    ProjectDto createForCategory(UUID categoryId, ProjectCreateDto dto);
 
-    PagedResponse<ProjectDto> getProjects(Pageable pageable);
+    PagedResponse<ProjectDto> getProjectsByCategory(UUID categoryId, Pageable pageable);
 
-    ProjectDto getProjectById(UUID id);
+    ProjectDto getProjectByCategory(UUID categoryId, UUID projectId);
 
-    ProjectDto updateProject(UUID id, ProjectUpdateDto dto);
+    ProjectDto updateForCategory(UUID categoryId, UUID projectId, ProjectUpdateDto dto);
 
-    void deleteProject(UUID id);
+    void deleteForCategory(UUID categoryId, UUID projectId);
 }

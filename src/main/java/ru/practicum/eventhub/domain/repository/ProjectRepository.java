@@ -6,11 +6,14 @@ import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import ru.practicum.eventhub.domain.model.Project;
 
+import java.util.Optional;
 import java.util.UUID;
 
 public interface ProjectRepository extends JpaRepository<Project, UUID> {
 
-    @Override
     @EntityGraph(attributePaths = {"category", "owner"})
-    Page<Project> findAll(Pageable pageable);
+    Page<Project> findAllByCategoryId(UUID categoryId, Pageable pageable);
+
+    @EntityGraph(attributePaths = {"category", "owner"})
+    Optional<Project> findByIdAndCategoryId(UUID projectId, UUID categoryId);
 }

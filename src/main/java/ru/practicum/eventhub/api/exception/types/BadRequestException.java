@@ -1,4 +1,4 @@
-package ru.practicum.eventhub.api.exception;
+package ru.practicum.eventhub.api.exception.types;
 
 public class BadRequestException extends RuntimeException {
     public BadRequestException(String message) {

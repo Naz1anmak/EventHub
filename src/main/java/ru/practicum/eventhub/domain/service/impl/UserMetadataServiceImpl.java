@@ -9,7 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.eventhub.api.dto.request.UserMetadataCreateDto;
 import ru.practicum.eventhub.api.dto.request.UserMetadataUpdateDto;
 import ru.practicum.eventhub.api.dto.response.UserMetadataDto;
-import ru.practicum.eventhub.api.exception.NotFoundException;
+import ru.practicum.eventhub.api.exception.types.NotFoundException;
 import ru.practicum.eventhub.api.mapper.UserMetadataMapper;
 import ru.practicum.eventhub.domain.dto.PagedResponse;
 import ru.practicum.eventhub.domain.model.User;
@@ -54,6 +54,7 @@ public class UserMetadataServiceImpl implements UserMetadataService {
     @Transactional(readOnly = true)
     public UserMetadataDto getByUserId(UUID userId) {
         UserMetadata userMetadata = getMetadataByUserIdOrThrow(userId);
+
         UUID metadataId = userMetadata.getId();
         log.info("Запрошена user-metadata с id={}, userId={}", metadataId, userId);
         return userMetadataMapper.toDto(userMetadata);
@@ -82,6 +83,6 @@ public class UserMetadataServiceImpl implements UserMetadataService {
 
     public UserMetadata getMetadataByUserIdOrThrow(UUID userId) {
         return userMetadataRepository.findByUserId(userId)
-                .orElseThrow(() -> new NotFoundException("User-metadata c userId=" + userId + " не найдена"));
+                .orElseThrow(() -> new NotFoundException("User-metadata по userId=" + userId + " не найдена"));
     }
 }

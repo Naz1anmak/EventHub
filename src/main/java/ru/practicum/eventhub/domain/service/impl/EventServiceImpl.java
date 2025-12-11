@@ -9,7 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.eventhub.api.dto.request.EventCreateDto;
 import ru.practicum.eventhub.api.dto.request.EventUpdateDto;
 import ru.practicum.eventhub.api.dto.response.EventDto;
-import ru.practicum.eventhub.api.exception.NotFoundException;
+import ru.practicum.eventhub.api.exception.types.NotFoundException;
 import ru.practicum.eventhub.api.mapper.EventMapper;
 import ru.practicum.eventhub.domain.dto.PagedResponse;
 import ru.practicum.eventhub.domain.model.Category;

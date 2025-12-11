@@ -15,13 +15,13 @@ public interface TagService {
 
     PagedResponse<TagDto> getTags(Pageable pageable);
 
-    TagDto getTagById(UUID id);
+    PagedResponse<TagDto> getTagsByEvent(UUID eventId, Pageable pageable);
 
-    TagDto updateTag(UUID id, TagUpdateDto dto);
+    TagDto getTagByEvent(UUID eventId, UUID tagId);
 
-    void deleteTag(UUID id);
+    TagDto updateForEvent(UUID eventId, UUID tagId, TagUpdateDto dto);
 
-    Tag getTagByIdOrThrow(UUID id);
+    void deleteForEvent(UUID eventId, UUID tagId);
 
     Set<Tag> getTagsByIdsOrThrow(Set<UUID> ids);
 }

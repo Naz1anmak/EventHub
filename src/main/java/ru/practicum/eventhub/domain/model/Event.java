@@ -69,7 +69,7 @@ public class Event {
     public void setTags(Collection<Tag> newTags) {
         this.tags.clear();
         if (newTags != null) {
-            newTags.forEach(this::addTag);
+            this.tags.addAll(newTags);
         }
     }
 

@@ -9,7 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.eventhub.api.dto.request.ProjectCreateDto;
 import ru.practicum.eventhub.api.dto.request.ProjectUpdateDto;
 import ru.practicum.eventhub.api.dto.response.ProjectDto;
-import ru.practicum.eventhub.api.exception.NotFoundException;
+import ru.practicum.eventhub.api.exception.types.NotFoundException;
 import ru.practicum.eventhub.api.mapper.ProjectMapper;
 import ru.practicum.eventhub.domain.dto.PagedResponse;
 import ru.practicum.eventhub.domain.model.Category;
@@ -33,8 +33,8 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     @Transactional
-    public ProjectDto createProject(ProjectCreateDto dto) {
-        Category category = categoryService.getCategoryByIdOrThrow(dto.categoryId());
+    public ProjectDto createForCategory(UUID categoryId, ProjectCreateDto dto) {
+        Category category = categoryService.getCategoryByIdOrThrow(categoryId);
         User owner = userService.getUserByIdOrThrow(dto.ownerId());
 
         Project project = projectMapper.fromCreateDto(dto, category, owner);
@@ -46,8 +46,8 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     @Transactional(readOnly = true)
-    public PagedResponse<ProjectDto> getProjects(Pageable pageable) {
-        Page<Project> projectPage = projectRepository.findAll(pageable);
+    public PagedResponse<ProjectDto> getProjectsByCategory(UUID categoryId, Pageable pageable) {
+        Page<Project> projectPage = projectRepository.findAllByCategoryId(categoryId, pageable);
 
         log.info("Получены проекты: страница {}, размер {}", pageable.getPageNumber(), pageable.getPageSize());
         return PagedResponse.from(projectPage, projectMapper::toDto);
@@ -55,16 +55,16 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     @Transactional(readOnly = true)
-    public ProjectDto getProjectById(UUID id) {
-        Project project = getProjectByIdOrThrow(id);
-        log.info("Запрошен проект с id={}", id);
+    public ProjectDto getProjectByCategory(UUID categoryId, UUID projectId) {
+        Project project = getProjectByIdAndCategoryIdOrThrow(projectId, categoryId);
+        log.info("Запрошен проект с id={} в категории с id={}", projectId, categoryId);
         return projectMapper.toDto(project);
     }
 
     @Override
     @Transactional
-    public ProjectDto updateProject(UUID id, ProjectUpdateDto dto) {
-        Project project = getProjectByIdOrThrow(id);
+    public ProjectDto updateForCategory(UUID categoryId, UUID projectId, ProjectUpdateDto dto) {
+        Project project = getProjectByIdAndCategoryIdOrThrow(projectId, categoryId);
 
         User owner = null;
         if (dto.ownerId() != null) {
@@ -79,20 +79,20 @@ public class ProjectServiceImpl implements ProjectService {
         projectMapper.updateProjectFromDto(dto, project, category, owner);
         project = projectRepository.save(project);
 
-        log.info("Обновлен проект с id={}", id);
+        log.info("Обновлен проект с id={} в категории с id={}", projectId, categoryId);
         return projectMapper.toDto(project);
     }
 
     @Override
     @Transactional
-    public void deleteProject(UUID id) {
-        getProjectByIdOrThrow(id);
-        projectRepository.deleteById(id);
-        log.info("Удален проект с id={}", id);
+    public void deleteForCategory(UUID categoryId, UUID projectId) {
+        getProjectByIdAndCategoryIdOrThrow(projectId, categoryId);
+        projectRepository.deleteById(projectId);
+        log.info("Удален проект с id={} в категории с id={}", projectId, categoryId);
     }
 
-    public Project getProjectByIdOrThrow(UUID id) {
-        return projectRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Проект с id=" + id + " не найден"));
+    public Project getProjectByIdAndCategoryIdOrThrow(UUID categoryId, UUID projectId) {
+        return projectRepository.findByIdAndCategoryId(projectId, categoryId)
+                .orElseThrow(() -> new NotFoundException("Проект с id=" + projectId + " в категории id=" + categoryId + " не найден"));
     }
 }

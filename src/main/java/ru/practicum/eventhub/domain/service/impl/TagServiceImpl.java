@@ -10,8 +10,8 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.eventhub.api.dto.request.TagCreateDto;
 import ru.practicum.eventhub.api.dto.request.TagUpdateDto;
 import ru.practicum.eventhub.api.dto.response.TagDto;
-import ru.practicum.eventhub.api.exception.ConflictException;
-import ru.practicum.eventhub.api.exception.NotFoundException;
+import ru.practicum.eventhub.api.exception.types.ConflictException;
+import ru.practicum.eventhub.api.exception.types.NotFoundException;
 import ru.practicum.eventhub.api.mapper.TagMapper;
 import ru.practicum.eventhub.domain.dto.PagedResponse;
 import ru.practicum.eventhub.domain.model.Tag;
@@ -57,16 +57,30 @@ public class TagServiceImpl implements TagService {
 
     @Override
     @Transactional(readOnly = true)
-    public TagDto getTagById(UUID id) {
-        Tag tag = getTagByIdOrThrow(id);
-        log.info("Получен тег с id={}", id);
+    public PagedResponse<TagDto> getTagsByEvent(UUID eventId, Pageable pageable) {
+        Page<Tag> tagPage = tagRepository.findAllByEventsId(eventId, pageable);
+        if (tagPage.isEmpty()) {
+            log.error("Не найдены теги для события с id={}", eventId);
+            throw new NotFoundException("Не найдены теги для события с id=" + eventId);
+        }
+
+        log.info("Запрошены теги для события с id={}: страница {}, размер {}",
+                eventId, pageable.getPageNumber(), pageable.getPageSize());
+        return PagedResponse.from(tagPage, tagMapper::toDto);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public TagDto getTagByEvent(UUID eventId, UUID tagId) {
+        Tag tag = getTagsByIdAndEventIdOrThrow(eventId, tagId);
+        log.info("Запрошен тег с id={} для события с id={}", tagId, eventId);
         return tagMapper.toDto(tag);
     }
 
     @Override
     @Transactional
-    public TagDto updateTag(UUID id, TagUpdateDto dto) {
-        Tag tag = getTagByIdOrThrow(id);
+    public TagDto updateForEvent(UUID eventId, UUID tagId, TagUpdateDto dto) {
+        Tag tag = getTagsByIdAndEventIdOrThrow(eventId, tagId);
         tagMapper.updateTagFromDto(dto, tag);
 
         try {
@@ -76,22 +90,16 @@ public class TagServiceImpl implements TagService {
             throw new ConflictException("Тег с именем '" + dto.name() + "' уже существует.");
         }
 
-        log.info("Обновлен тег с id={}", id);
+        log.info("Обновлен тег с id={} для события с id={}", tagId, eventId);
         return tagMapper.toDto(tag);
     }
 
     @Override
     @Transactional
-    public void deleteTag(UUID id) {
-        Tag tag = getTagByIdOrThrow(id);
+    public void deleteForEvent(UUID eventId, UUID tagId) {
+        Tag tag = getTagsByIdAndEventIdOrThrow(eventId, tagId);
         tagRepository.delete(tag);
-        log.info("Удален тег с id={}", id);
-    }
-
-    @Override
-    public Tag getTagByIdOrThrow(UUID id) {
-        return tagRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Тег с ID '" + id + "' не найден."));
+        log.info("Удален тег с id={} для события с id={}", tagId, eventId);
     }
 
     @Override
@@ -110,5 +118,10 @@ public class TagServiceImpl implements TagService {
         }
 
         return tags;
+    }
+
+    public Tag getTagsByIdAndEventIdOrThrow(UUID eventId, UUID tagId) {
+        return tagRepository.findByIdAndEventsId(tagId, eventId)
+                .orElseThrow(() -> new NotFoundException("Тег с id=" + tagId + " для события с id=" + eventId + " не найден"));
     }
 }
