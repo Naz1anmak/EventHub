@@ -6,7 +6,6 @@ import ru.practicum.eventhub.api.dto.request.UserCreateDto;
 import ru.practicum.eventhub.api.dto.request.UserUpdateDto;
 import ru.practicum.eventhub.api.dto.response.UserDto;
 import ru.practicum.eventhub.domain.dto.PagedResponse;
-import ru.practicum.eventhub.domain.model.User;
 
 import java.util.UUID;
 
@@ -20,6 +19,4 @@ public interface UserService {
     UserDto updateUser(UUID id, @Valid UserUpdateDto dto);
 
     void deleteUser(UUID id);
-
-    User getUserByIdOrThrow(UUID userId);
 }

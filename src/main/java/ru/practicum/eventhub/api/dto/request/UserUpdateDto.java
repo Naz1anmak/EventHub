@@ -5,10 +5,10 @@ import jakarta.validation.constraints.Size;
 
 public record UserUpdateDto(
 
-        @Size(max = 50, message = "Username must be up to 50 characters")
+        @Size(max = 50, message = "Username должен быть до 50 символов")
         String username,
 
-        @Email
+        @Email(message = "Email должен быть корректным")
         String email
 ) {
 }

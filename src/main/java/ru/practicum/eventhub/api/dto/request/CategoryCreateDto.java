@@ -5,11 +5,11 @@ import jakarta.validation.constraints.Size;
 
 public record CategoryCreateDto(
 
-        @NotBlank(message = "Name must not be blank")
-        @Size(min = 3, max = 100, message = "Name must be between 3 and 100 characters")
+        @NotBlank(message = "Иmя не должно быть пустым")
+        @Size(min = 3, max = 100, message = "Иmя должно быть от 3 до 100 символов")
         String name,
 
-        @Size(max = 255, message = "Description must be up to 255 characters")
+        @Size(max = 255, message = "Описание должно быть до 255 символов")
         String description
 ) {
 }

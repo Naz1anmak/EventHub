@@ -5,9 +5,7 @@ import ru.practicum.eventhub.api.dto.request.TagCreateDto;
 import ru.practicum.eventhub.api.dto.request.TagUpdateDto;
 import ru.practicum.eventhub.api.dto.response.TagDto;
 import ru.practicum.eventhub.domain.dto.PagedResponse;
-import ru.practicum.eventhub.domain.model.Tag;
 
-import java.util.Set;
 import java.util.UUID;
 
 public interface TagService {
@@ -22,6 +20,4 @@ public interface TagService {
     TagDto updateForEvent(UUID eventId, UUID tagId, TagUpdateDto dto);
 
     void deleteForEvent(UUID eventId, UUID tagId);
-
-    Set<Tag> getTagsByIdsOrThrow(Set<UUID> ids);
 }

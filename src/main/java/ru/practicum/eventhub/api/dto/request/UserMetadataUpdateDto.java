@@ -7,7 +7,7 @@ public record UserMetadataUpdateDto(
         String lastName,
         String bio,
 
-        @Size(max = 15, message = "Phone number must not exceed 15 characters")
+        @Size(max = 15, message = "Номер телефона должен быть до 15 символов")
         String phone
 ) {
 }

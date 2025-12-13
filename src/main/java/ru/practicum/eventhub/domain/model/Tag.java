@@ -1,7 +1,6 @@
 package ru.practicum.eventhub.domain.model;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
@@ -18,15 +17,13 @@ import java.util.UUID;
 @Table(name = "tags")
 @Getter
 @Setter
-@EqualsAndHashCode(onlyExplicitlyIncluded = true)
+@EqualsAndHashCode(of = "id")
 public class Tag {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    @EqualsAndHashCode.Include
     private UUID id;
 
-    @NotBlank
     @Column(nullable = false, unique = true)
     private String name;
 

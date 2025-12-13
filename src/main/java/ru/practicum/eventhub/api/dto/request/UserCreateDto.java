@@ -6,11 +6,11 @@ import jakarta.validation.constraints.Size;
 
 public record UserCreateDto(
 
-        @NotBlank(message = "Username cannot be blank")
-        @Size(min = 3, max = 50, message = "Username must be between 3 and 50 characters")
+        @NotBlank(message = "Username не должен быть пустым")
+        @Size(min = 3, max = 50, message = "Username должен быть от 3 до 50 символов")
         String username,
 
-        @Email
+        @Email(message = "Email должен быть корректным")
         String email
 ) {
 }

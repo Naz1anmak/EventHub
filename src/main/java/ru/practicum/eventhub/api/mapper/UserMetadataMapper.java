@@ -7,7 +7,9 @@ import ru.practicum.eventhub.api.dto.response.UserMetadataDto;
 import ru.practicum.eventhub.domain.model.User;
 import ru.practicum.eventhub.domain.model.UserMetadata;
 
-@Mapper(componentModel = "spring")
+import static org.mapstruct.MappingConstants.ComponentModel.SPRING;
+
+@Mapper(componentModel = SPRING)
 public interface UserMetadataMapper {
     UserMetadataDto toDto(UserMetadata userMetadata);
 

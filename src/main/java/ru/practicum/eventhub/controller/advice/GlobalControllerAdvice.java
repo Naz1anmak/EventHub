@@ -1,4 +1,4 @@
-package ru.practicum.eventhub.api.exception;
+package ru.practicum.eventhub.controller.advice;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;
@@ -14,13 +14,13 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.HandlerMethodValidationException;
 import org.springframework.web.servlet.NoHandlerFoundException;
-import ru.practicum.eventhub.api.exception.types.*;
+import ru.practicum.eventhub.api.exception.*;
 
 import java.util.stream.Collectors;
 
 @Slf4j
 @RestControllerAdvice
-public class ErrorHandler {
+public class GlobalControllerAdvice {
 
     @ExceptionHandler(NotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)

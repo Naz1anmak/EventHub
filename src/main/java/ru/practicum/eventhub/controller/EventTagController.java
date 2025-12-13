@@ -1,4 +1,4 @@
-package ru.practicum.eventhub.api.controller;
+package ru.practicum.eventhub.controller;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
@@ -34,14 +34,17 @@ public class EventTagController {
         return eventService.createEvent(dto);
     }
 
-    @GetMapping
-    public PagedResponse<EventDto> getEvents(@RequestParam(required = false) UUID userId,
-                                             @RequestParam(defaultValue = "0") @PositiveOrZero Integer page,
+    @GetMapping(params = "!userId")
+    public PagedResponse<EventDto> getEvents(@RequestParam(defaultValue = "0") @PositiveOrZero Integer page,
                                              @RequestParam(defaultValue = "10") @Positive Integer size) {
-        if (userId != null) {
-            return eventService.getEventsByUser(userId, PageRequest.of(page, size));
-        }
         return eventService.getEvents(PageRequest.of(page, size));
+    }
+
+    @GetMapping
+    public PagedResponse<EventDto> getEventsByUser(@RequestParam UUID userId,
+                                                   @RequestParam(defaultValue = "0") @PositiveOrZero Integer page,
+                                                   @RequestParam(defaultValue = "10") @Positive Integer size) {
+        return eventService.getEventsByUser(userId, PageRequest.of(page, size));
     }
 
     @GetMapping("/{eventId}")

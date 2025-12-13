@@ -5,7 +5,6 @@ import ru.practicum.eventhub.api.dto.request.CategoryCreateDto;
 import ru.practicum.eventhub.api.dto.request.CategoryUpdateDto;
 import ru.practicum.eventhub.api.dto.response.CategoryDto;
 import ru.practicum.eventhub.domain.dto.PagedResponse;
-import ru.practicum.eventhub.domain.model.Category;
 
 import java.util.UUID;
 
@@ -19,6 +18,4 @@ public interface CategoryService {
     CategoryDto updateCategory(UUID id, CategoryUpdateDto dto);
 
     void deleteCategory(UUID id);
-
-    Category getCategoryByIdOrThrow(UUID id);
 }

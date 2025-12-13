@@ -14,12 +14,11 @@ import java.util.UUID;
 @Table(name = "user_metadata")
 @Getter
 @Setter
-@EqualsAndHashCode(onlyExplicitlyIncluded = true)
+@EqualsAndHashCode(of = "id")
 public class UserMetadata {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    @EqualsAndHashCode.Include
     private UUID id;
 
     @OneToOne(fetch = FetchType.LAZY)

@@ -1,4 +1,4 @@
-package ru.practicum.eventhub.api.exception.types;
+package ru.practicum.eventhub.api.exception;
 
 public class NotFoundException extends RuntimeException {
     public NotFoundException(String message) {

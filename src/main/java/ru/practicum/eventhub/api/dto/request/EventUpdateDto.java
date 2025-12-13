@@ -10,13 +10,13 @@ import java.util.UUID;
 
 public record EventUpdateDto(
 
-        @Size(max = 100, message = "Title must be up to 100 characters")
+        @Size(max = 100, message = "Заголовок должен быть до 100 символов")
         String title,
 
-        @Size(max = 255, message = "Description must be up to 255 characters")
+        @Size(max = 255, message = "Описание не должно превышать 255 символов")
         String description,
 
-        @FutureOrPresent(message = "Event date must be in the present or future")
+        @FutureOrPresent(message = "Дата и время события должны быть в будущем или настоящем")
         OffsetDateTime eventDate,
 
         String location,

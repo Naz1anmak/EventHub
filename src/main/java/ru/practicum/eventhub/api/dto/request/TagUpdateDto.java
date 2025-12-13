@@ -4,10 +4,10 @@ import jakarta.validation.constraints.Size;
 
 public record TagUpdateDto(
 
-        @Size(max = 50, message = "Name must be up to 50 characters")
+        @Size(max = 50, message = "Иmя должно быть до 50 символов")
         String name,
 
-        @Size(max = 255, message = "Description must be up to 255 characters")
+        @Size(max = 255, message = "Описание не должно превышать 255 символов")
         String description
 ) {
 }

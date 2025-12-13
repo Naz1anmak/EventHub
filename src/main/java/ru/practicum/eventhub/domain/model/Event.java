@@ -1,7 +1,6 @@
 package ru.practicum.eventhub.domain.model;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -16,15 +15,13 @@ import java.util.*;
 @Table(name = "events")
 @Getter
 @Setter
-@EqualsAndHashCode(onlyExplicitlyIncluded = true)
+@EqualsAndHashCode(of = "id")
 public class Event {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    @EqualsAndHashCode.Include
     private UUID id;
 
-    @NotBlank
     @Column(nullable = false)
     private String title;
 
@@ -47,8 +44,8 @@ public class Event {
     @ManyToMany
     @JoinTable(
             name = "event_tags",
-            joinColumns = @JoinColumn(name = "event_id"),
-            inverseJoinColumns = @JoinColumn(name = "tag_id")
+            joinColumns = @JoinColumn(name = "event_id", nullable = false),
+            inverseJoinColumns = @JoinColumn(name = "tag_id", nullable = false)
     )
     private Set<Tag> tags = new HashSet<>();
 

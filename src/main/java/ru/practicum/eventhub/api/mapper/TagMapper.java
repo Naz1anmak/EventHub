@@ -6,7 +6,9 @@ import ru.practicum.eventhub.api.dto.request.TagUpdateDto;
 import ru.practicum.eventhub.api.dto.response.TagDto;
 import ru.practicum.eventhub.domain.model.Tag;
 
-@Mapper(componentModel = "spring")
+import static org.mapstruct.MappingConstants.ComponentModel.SPRING;
+
+@Mapper(componentModel = SPRING)
 public interface TagMapper {
     TagDto toDto(Tag tag);
 

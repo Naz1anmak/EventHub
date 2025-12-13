@@ -11,7 +11,9 @@ import ru.practicum.eventhub.domain.model.User;
 
 import java.util.Set;
 
-@Mapper(componentModel = "spring")
+import static org.mapstruct.MappingConstants.ComponentModel.SPRING;
+
+@Mapper(componentModel = SPRING)
 public interface EventMapper {
     EventDto toDto(Event event);
 

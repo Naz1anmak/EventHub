@@ -10,8 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.eventhub.api.dto.request.UserCreateDto;
 import ru.practicum.eventhub.api.dto.request.UserUpdateDto;
 import ru.practicum.eventhub.api.dto.response.UserDto;
-import ru.practicum.eventhub.api.exception.types.ConflictException;
-import ru.practicum.eventhub.api.exception.types.NotFoundException;
+import ru.practicum.eventhub.api.exception.ConflictException;
 import ru.practicum.eventhub.api.mapper.UserMapper;
 import ru.practicum.eventhub.domain.dto.PagedResponse;
 import ru.practicum.eventhub.domain.model.User;
@@ -26,6 +25,7 @@ import java.util.UUID;
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final UserMapper userMapper;
+    private final UserReader userReader;
 
     @Override
     @Transactional
@@ -56,13 +56,13 @@ public class UserServiceImpl implements UserService {
     @Transactional(readOnly = true)
     public UserDto getUserById(UUID id) {
         log.info("Запрошен пользователь с id={}", id);
-        return userMapper.toDto(getUserByIdOrThrow(id));
+        return userMapper.toDto(userReader.findById(id));
     }
 
     @Override
     @Transactional
     public UserDto updateUser(UUID id, UserUpdateDto dto) {
-        User user = getUserByIdOrThrow(id);
+        User user = userReader.findById(id);
         userMapper.updateUserFromDto(dto, user);
 
         try {
@@ -79,14 +79,8 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public void deleteUser(UUID id) {
-        getUserByIdOrThrow(id);
+        userReader.findById(id);
         userRepository.deleteById(id);
         log.info("Удален пользователь с id={}", id);
-    }
-
-    @Override
-    public User getUserByIdOrThrow(UUID userId) {
-        return userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException("Пользователь с id=" + userId + " не найден"));
     }
 }

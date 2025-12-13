@@ -9,7 +9,6 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.eventhub.api.dto.request.EventCreateDto;
 import ru.practicum.eventhub.api.dto.request.EventUpdateDto;
 import ru.practicum.eventhub.api.dto.response.EventDto;
-import ru.practicum.eventhub.api.exception.types.NotFoundException;
 import ru.practicum.eventhub.api.mapper.EventMapper;
 import ru.practicum.eventhub.domain.dto.PagedResponse;
 import ru.practicum.eventhub.domain.model.Category;
@@ -17,10 +16,7 @@ import ru.practicum.eventhub.domain.model.Event;
 import ru.practicum.eventhub.domain.model.Tag;
 import ru.practicum.eventhub.domain.model.User;
 import ru.practicum.eventhub.domain.repository.EventRepository;
-import ru.practicum.eventhub.domain.service.CategoryService;
 import ru.practicum.eventhub.domain.service.EventService;
-import ru.practicum.eventhub.domain.service.TagService;
-import ru.practicum.eventhub.domain.service.UserService;
 
 import java.util.Set;
 import java.util.UUID;
@@ -30,21 +26,18 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class EventServiceImpl implements EventService {
     private final EventRepository eventRepository;
+    private final EventReader eventReader;
     private final EventMapper eventMapper;
-    private final CategoryService categoryService;
-    private final UserService userService;
-    private final TagService tagService;
+    private final CategoryReader categoryReader;
+    private final UserReader userReader;
+    private final TagReader tagReader;
 
     @Override
     @Transactional
     public EventDto createEvent(EventCreateDto dto) {
-        Category category = categoryService.getCategoryByIdOrThrow(dto.categoryId());
-        User user = userService.getUserByIdOrThrow(dto.createdBy());
-
-        Set<Tag> tags = Set.of();
-        if (dto.tags() != null && !dto.tags().isEmpty()) {
-            tags = tagService.getTagsByIdsOrThrow(dto.tags());
-        }
+        Category category = categoryReader.findById(dto.categoryId());
+        User user = userReader.findById(dto.createdBy());
+        Set<Tag> tags = tagReader.getTagsByIds(dto.tags());
 
         Event event = eventMapper.fromCreateDto(dto, category, user, tags);
         event = eventRepository.save(event);
@@ -65,7 +58,7 @@ public class EventServiceImpl implements EventService {
     @Override
     @Transactional(readOnly = true)
     public PagedResponse<EventDto> getEventsByUser(UUID userId, Pageable pageable) {
-        User user = userService.getUserByIdOrThrow(userId);
+        User user = userReader.findById(userId);
         Page<Event> eventPage = eventRepository.findByCreatedBy(user, pageable);
 
         log.info("Запрошены события пользователя {}: страница {}, размер {}",
@@ -76,7 +69,7 @@ public class EventServiceImpl implements EventService {
     @Override
     @Transactional(readOnly = true)
     public EventDto getEventById(UUID id) {
-        Event event = getEventByIdOrThrow(id);
+        Event event = eventReader.findById(id);
         log.info("Запрошено событие с id={}", id);
         return eventMapper.toDto(event);
     }
@@ -84,20 +77,20 @@ public class EventServiceImpl implements EventService {
     @Override
     @Transactional
     public EventDto updateEvent(UUID id, EventUpdateDto dto) {
-        Event event = getEventByIdOrThrow(id);
+        Event event = eventReader.findById(id);
 
         Category category = null;
         if (dto.categoryId() != null) {
-            category = categoryService.getCategoryByIdOrThrow(dto.categoryId());
+            category = categoryReader.findById(dto.categoryId());
         }
 
         User user = null;
         if (dto.createdBy() != null) {
-            user = userService.getUserByIdOrThrow(dto.createdBy());
+            user = userReader.findById(dto.createdBy());
         }
 
         if (dto.tags() != null) {
-            Set<Tag> tags = dto.tags().isEmpty() ? Set.of() : tagService.getTagsByIdsOrThrow(dto.tags());
+            Set<Tag> tags = dto.tags().isEmpty() ? Set.of() : tagReader.getTagsByIds(dto.tags());
 
             if (dto.tagUpdateMode() != null) {
                 dto.tagUpdateMode().apply(event, tags);
@@ -116,13 +109,8 @@ public class EventServiceImpl implements EventService {
     @Override
     @Transactional
     public void deleteEvent(UUID id) {
-        getEventByIdOrThrow(id);
+        eventReader.findById(id);
         eventRepository.deleteById(id);
         log.info("Удалено событие с id={}", id);
-    }
-
-    public Event getEventByIdOrThrow(UUID id) {
-        return eventRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Событие с id=" + id + " не найдено"));
     }
 }

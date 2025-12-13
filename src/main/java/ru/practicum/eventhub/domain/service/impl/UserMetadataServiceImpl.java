@@ -9,14 +9,12 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.eventhub.api.dto.request.UserMetadataCreateDto;
 import ru.practicum.eventhub.api.dto.request.UserMetadataUpdateDto;
 import ru.practicum.eventhub.api.dto.response.UserMetadataDto;
-import ru.practicum.eventhub.api.exception.types.NotFoundException;
 import ru.practicum.eventhub.api.mapper.UserMetadataMapper;
 import ru.practicum.eventhub.domain.dto.PagedResponse;
 import ru.practicum.eventhub.domain.model.User;
 import ru.practicum.eventhub.domain.model.UserMetadata;
 import ru.practicum.eventhub.domain.repository.UserMetadataRepository;
 import ru.practicum.eventhub.domain.service.UserMetadataService;
-import ru.practicum.eventhub.domain.service.UserService;
 
 import java.util.UUID;
 
@@ -25,13 +23,14 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class UserMetadataServiceImpl implements UserMetadataService {
     private final UserMetadataRepository userMetadataRepository;
+    private final UserMetadataReader userMetadataReader;
     private final UserMetadataMapper userMetadataMapper;
-    private final UserService userService;
+    private final UserReader userReader;
 
     @Override
     @Transactional
     public UserMetadataDto createForUser(UUID userId, UserMetadataCreateDto dto) {
-        User user = userService.getUserByIdOrThrow(userId);
+        User user = userReader.findById(userId);
 
         UserMetadata userMetadata = userMetadataMapper.fromCreateDto(dto, user);
         userMetadata = userMetadataRepository.save(userMetadata);
@@ -53,7 +52,7 @@ public class UserMetadataServiceImpl implements UserMetadataService {
     @Override
     @Transactional(readOnly = true)
     public UserMetadataDto getByUserId(UUID userId) {
-        UserMetadata userMetadata = getMetadataByUserIdOrThrow(userId);
+        UserMetadata userMetadata = userMetadataReader.findByUserId(userId);
 
         UUID metadataId = userMetadata.getId();
         log.info("Запрошена user-metadata с id={}, userId={}", metadataId, userId);
@@ -63,7 +62,7 @@ public class UserMetadataServiceImpl implements UserMetadataService {
     @Override
     @Transactional
     public UserMetadataDto updateByUserId(UUID userId, UserMetadataUpdateDto dto) {
-        UserMetadata userMetadata = getMetadataByUserIdOrThrow(userId);
+        UserMetadata userMetadata = userMetadataReader.findByUserId(userId);
 
         userMetadataMapper.updateFromDto(dto, userMetadata);
         userMetadata = userMetadataRepository.save(userMetadata);
@@ -75,14 +74,9 @@ public class UserMetadataServiceImpl implements UserMetadataService {
     @Override
     @Transactional
     public void deleteByUserId(UUID userId) {
-        UserMetadata userMetadata = getMetadataByUserIdOrThrow(userId);
+        UserMetadata userMetadata = userMetadataReader.findByUserId(userId);
         UUID metadataId = userMetadata.getId();
         userMetadataRepository.deleteById(metadataId);
         log.info("Удалена user-metadata c id={}, userId={}", metadataId, userId);
-    }
-
-    public UserMetadata getMetadataByUserIdOrThrow(UUID userId) {
-        return userMetadataRepository.findByUserId(userId)
-                .orElseThrow(() -> new NotFoundException("User-metadata по userId=" + userId + " не найдена"));
     }
 }

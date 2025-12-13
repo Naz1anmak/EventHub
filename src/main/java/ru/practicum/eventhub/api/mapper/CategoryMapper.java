@@ -6,7 +6,9 @@ import ru.practicum.eventhub.api.dto.request.CategoryUpdateDto;
 import ru.practicum.eventhub.api.dto.response.CategoryDto;
 import ru.practicum.eventhub.domain.model.Category;
 
-@Mapper(componentModel = "spring")
+import static org.mapstruct.MappingConstants.ComponentModel.SPRING;
+
+@Mapper(componentModel = SPRING)
 public interface CategoryMapper {
     CategoryDto toDto(Category category);
 

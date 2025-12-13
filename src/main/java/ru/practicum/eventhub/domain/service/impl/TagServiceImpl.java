@@ -10,18 +10,15 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.eventhub.api.dto.request.TagCreateDto;
 import ru.practicum.eventhub.api.dto.request.TagUpdateDto;
 import ru.practicum.eventhub.api.dto.response.TagDto;
-import ru.practicum.eventhub.api.exception.types.ConflictException;
-import ru.practicum.eventhub.api.exception.types.NotFoundException;
+import ru.practicum.eventhub.api.exception.ConflictException;
+import ru.practicum.eventhub.api.exception.NotFoundException;
 import ru.practicum.eventhub.api.mapper.TagMapper;
 import ru.practicum.eventhub.domain.dto.PagedResponse;
 import ru.practicum.eventhub.domain.model.Tag;
 import ru.practicum.eventhub.domain.repository.TagRepository;
 import ru.practicum.eventhub.domain.service.TagService;
 
-import java.util.HashSet;
-import java.util.Set;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -29,6 +26,7 @@ import java.util.stream.Collectors;
 public class TagServiceImpl implements TagService {
     private final TagRepository tagRepository;
     private final TagMapper tagMapper;
+    private final TagReader tagReader;
 
     @Override
     @Transactional
@@ -72,7 +70,7 @@ public class TagServiceImpl implements TagService {
     @Override
     @Transactional(readOnly = true)
     public TagDto getTagByEvent(UUID eventId, UUID tagId) {
-        Tag tag = getTagsByIdAndEventIdOrThrow(eventId, tagId);
+        Tag tag = tagReader.findByIdAndEventsId(tagId, eventId);
         log.info("Запрошен тег с id={} для события с id={}", tagId, eventId);
         return tagMapper.toDto(tag);
     }
@@ -80,7 +78,7 @@ public class TagServiceImpl implements TagService {
     @Override
     @Transactional
     public TagDto updateForEvent(UUID eventId, UUID tagId, TagUpdateDto dto) {
-        Tag tag = getTagsByIdAndEventIdOrThrow(eventId, tagId);
+        Tag tag = tagReader.findByIdAndEventsId(tagId, eventId);
         tagMapper.updateTagFromDto(dto, tag);
 
         try {
@@ -97,31 +95,8 @@ public class TagServiceImpl implements TagService {
     @Override
     @Transactional
     public void deleteForEvent(UUID eventId, UUID tagId) {
-        Tag tag = getTagsByIdAndEventIdOrThrow(eventId, tagId);
+        Tag tag = tagReader.findByIdAndEventsId(tagId, eventId);
         tagRepository.delete(tag);
         log.info("Удален тег с id={} для события с id={}", tagId, eventId);
-    }
-
-    @Override
-    public Set<Tag> getTagsByIdsOrThrow(Set<UUID> ids) {
-        if (ids == null || ids.isEmpty()) {
-            return Set.of();
-        }
-
-        Set<Tag> tags = new HashSet<>(tagRepository.findAllById(ids));
-        if (tags.size() != ids.size()) {
-            Set<UUID> foundIds = tags.stream().map(Tag::getId).collect(Collectors.toSet());
-            Set<UUID> missing = new HashSet<>(ids);
-            missing.removeAll(foundIds);
-            log.error("Не найдены теги c id={}", missing);
-            throw new NotFoundException("Не найдены теги c id=" + missing);
-        }
-
-        return tags;
-    }
-
-    public Tag getTagsByIdAndEventIdOrThrow(UUID eventId, UUID tagId) {
-        return tagRepository.findByIdAndEventsId(tagId, eventId)
-                .orElseThrow(() -> new NotFoundException("Тег с id=" + tagId + " для события с id=" + eventId + " не найден"));
     }
 }

@@ -10,8 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.eventhub.api.dto.request.CategoryCreateDto;
 import ru.practicum.eventhub.api.dto.request.CategoryUpdateDto;
 import ru.practicum.eventhub.api.dto.response.CategoryDto;
-import ru.practicum.eventhub.api.exception.types.ConflictException;
-import ru.practicum.eventhub.api.exception.types.NotFoundException;
+import ru.practicum.eventhub.api.exception.ConflictException;
 import ru.practicum.eventhub.api.mapper.CategoryMapper;
 import ru.practicum.eventhub.domain.dto.PagedResponse;
 import ru.practicum.eventhub.domain.model.Category;
@@ -26,6 +25,7 @@ import java.util.UUID;
 public class CategoryServiceImpl implements CategoryService {
     private final CategoryRepository categoryRepository;
     private final CategoryMapper categoryMapper;
+    private final CategoryReader categoryReader;
 
     @Override
     @Transactional
@@ -56,7 +56,7 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     @Transactional(readOnly = true)
     public CategoryDto getCategoryById(UUID id) {
-        Category category = getCategoryByIdOrThrow(id);
+        Category category = categoryReader.findById(id);
         log.info("Отправлена категория c id={}", id);
         return categoryMapper.toDto(category);
     }
@@ -64,7 +64,7 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     @Transactional
     public CategoryDto updateCategory(UUID id, CategoryUpdateDto dto) {
-        Category category = getCategoryByIdOrThrow(id);
+        Category category = categoryReader.findById(id);
         categoryMapper.updateCategoryFromDto(dto, category);
 
         try {
@@ -81,14 +81,8 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     @Transactional
     public void deleteCategory(UUID id) {
-        getCategoryByIdOrThrow(id);
+        categoryReader.findById(id);
         categoryRepository.deleteById(id);
         log.info("Удалена категория с id={}", id);
-    }
-
-    @Override
-    public Category getCategoryByIdOrThrow(UUID id) {
-        return categoryRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Категория с id=" + id + " не найдена."));
     }
 }

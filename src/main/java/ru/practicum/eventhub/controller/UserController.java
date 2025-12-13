@@ -1,4 +1,4 @@
-package ru.practicum.eventhub.api.controller;
+package ru.practicum.eventhub.controller;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;

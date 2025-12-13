@@ -6,7 +6,9 @@ import ru.practicum.eventhub.api.dto.request.UserUpdateDto;
 import ru.practicum.eventhub.api.dto.response.UserDto;
 import ru.practicum.eventhub.domain.model.User;
 
-@Mapper(componentModel = "spring")
+import static org.mapstruct.MappingConstants.ComponentModel.SPRING;
+
+@Mapper(componentModel = SPRING)
 public interface UserMapper {
     UserDto toDto(User user);
 

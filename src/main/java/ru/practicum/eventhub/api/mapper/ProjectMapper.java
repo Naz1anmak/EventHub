@@ -8,7 +8,9 @@ import ru.practicum.eventhub.domain.model.Category;
 import ru.practicum.eventhub.domain.model.Project;
 import ru.practicum.eventhub.domain.model.User;
 
-@Mapper(componentModel = "spring")
+import static org.mapstruct.MappingConstants.ComponentModel.SPRING;
+
+@Mapper(componentModel = SPRING)
 public interface ProjectMapper {
     ProjectDto toDto(Project project);
 
