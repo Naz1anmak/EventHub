@@ -15,9 +15,6 @@ public record ProjectCreateDto(
         @Size(max = 255, message = "Описание должно быть до 255 символов")
         String description,
 
-        @NotNull(message = "Поле categoryId не должно быть null")
-        UUID categoryId,
-
         @NotNull(message = "Поле ownerId не должно быть null")
         UUID ownerId
 ) {

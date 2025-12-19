@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+import ru.practicum.eventhub.api.dto.request.TagCreateDto;
 
 import java.time.OffsetDateTime;
 import java.util.Collections;
@@ -42,5 +43,12 @@ public class Tag {
 
     public Set<Event> getEvents() {
         return Collections.unmodifiableSet(events);
+    }
+
+    public static Tag create(TagCreateDto dto) {
+        Tag tag = new Tag();
+        tag.setName(dto.name());
+        tag.setDescription(dto.description());
+        return tag;
     }
 }

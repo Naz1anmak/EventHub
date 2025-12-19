@@ -1,10 +1,12 @@
 package ru.practicum.eventhub.api.dto.request;
 
-import jakarta.validation.constraints.*;
+import jakarta.validation.constraints.FutureOrPresent;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.Size;
 
 import java.time.OffsetDateTime;
 import java.util.Set;
-import java.util.UUID;
 
 public record EventCreateDto(
 
@@ -20,13 +22,7 @@ public record EventCreateDto(
 
         String location,
 
-        @NotNull(message = "Поле categoryId не должно быть null")
-        UUID categoryId,
-
-        @NotNull(message = "Поле createdBy не должно быть null")
-        UUID createdBy,
-
         @NotEmpty(message = "Список тегов не должен быть пустым")
-        Set<UUID> tags
+        Set<TagCreateDto> tags
 ) {
 }

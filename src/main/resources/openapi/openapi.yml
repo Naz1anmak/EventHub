@@ -241,48 +241,6 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
   /users/v1/api/{userId}/metadata:
-    post:
-      tags:
-        - user-metadata
-      summary: Создать метаданные пользователя
-      parameters:
-        - in: path
-          name: userId
-          required: true
-          schema:
-            type: string
-            format: uuid
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/UserMetadataCreateDto'
-      responses:
-        '201':
-          description: Метаданные пользователя успешно созданы
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/UserMetadataDto'
-        '400':
-          description: Некорректные данные запроса
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-        '404':
-          description: Пользователь не найден
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-        '500':
-          description: Внутренняя ошибка сервера
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
     get:
       tags:
         - user-metadata
@@ -841,13 +799,6 @@ paths:
       summary: Список событий
       parameters:
         - in: query
-          name: userId
-          schema:
-            type: string
-            format: uuid
-          required: false
-          description: "Фильтр: вернуть события только указанного пользователя"
-        - in: query
           name: page
           schema:
             type: integer
@@ -1258,7 +1209,7 @@ components:
     # ----- Requests -----
     EventCreateDto:
       type: object
-      required: [ title, createdBy, categoryId ]
+      required: [ title, tags ]
       properties:
         title:
           type: string
@@ -1280,23 +1231,11 @@ components:
           type: string
           description: Место проведения
           example: "Москва, ул. Ленина, 10"
-        categoryId:
-          type: string
-          format: uuid
-          description: Идентификатор категории
-          example: "b1a7e8c2-3d4f-4e2a-9c1a-2b3c4d5e6f7a"
-        createdBy:
-          type: string
-          format: uuid
-          description: Идентификатор пользователя, создавшего событие
-          example: "a1234567-89ab-cdef-0123-456789abcdef"
         tags:
           type: array
           description: Список идентификаторов тегов
           items:
-            type: string
-            format: uuid
-            example: "c1d2e3f4-5678-1234-abcd-9876543210ab"
+            $ref: '#/components/schemas/TagCreateDto'
 
     EventUpdateDto:
       type: object
@@ -1320,16 +1259,6 @@ components:
           type: string
           description: Новое место проведения
           example: "Санкт-Петербург, пр. Невский, 100"
-        categoryId:
-          type: string
-          format: uuid
-          description: Новый идентификатор категории
-          example: "b1a7e8c2-3d4f-4e2a-9c1a-2b3c4d5e6f7a"
-        createdBy:
-          type: string
-          format: uuid
-          description: Новый идентификатор пользователя
-          example: "a1234567-89ab-cdef-0123-456789abcdef"
         tags:
           type: array
           description: Новый список идентификаторов тегов
@@ -1345,7 +1274,7 @@ components:
 
     CategoryCreateDto:
       type: object
-      required: [ name ]
+      required: [ name, projects ]
       properties:
         name:
           type: string
@@ -1358,6 +1287,11 @@ components:
           maxLength: 255
           description: Описание категории
           example: "Категория для технологических событий."
+        projects:
+          type: array
+          description: Список проектов в категории
+          items:
+            $ref: '#/components/schemas/ProjectNestedCreateDto'
 
     CategoryUpdateDto:
       type: object
@@ -1405,7 +1339,7 @@ components:
 
     UserCreateDto:
       type: object
-      required: [ username ]
+      required: [ username, metadata ]
       properties:
         username:
           type: string
@@ -1418,6 +1352,11 @@ components:
           format: email
           description: Email пользователя
           example: "ivan.petrov@example.com"
+        metadata:
+          type: array
+          description: Metadata пользователя
+          items:
+            $ref: '#/components/schemas/UserMetadataCreateDto'
 
     UserUpdateDto:
       type: object
@@ -1477,7 +1416,7 @@ components:
 
     ProjectCreateDto:
       type: object
-      required: [ name, ownerId, categoryId ]
+      required: [ name, ownerId ]
       properties:
         name:
           type: string
@@ -1490,11 +1429,27 @@ components:
           maxLength: 255
           description: Описание проекта
           example: "Платформа для организации событий."
-        categoryId:
+        ownerId:
           type: string
           format: uuid
-          description: Идентификатор категории
-          example: "b1a7e8c2-3d4f-4e2a-9c1a-2b3c4d5e6f7a"
+          description: Идентификатор владельца
+          example: "a1234567-89ab-cdef-0123-456789abcdef"
+
+    ProjectNestedCreateDto:
+      type: object
+      required: [ name, ownerId ]
+      properties:
+        name:
+          type: string
+          minLength: 3
+          maxLength: 100
+          description: Название проекта
+          example: "EventHub"
+        description:
+          type: string
+          maxLength: 255
+          description: Описание проекта
+          example: "Платформа для организации событий."
         ownerId:
           type: string
           format: uuid

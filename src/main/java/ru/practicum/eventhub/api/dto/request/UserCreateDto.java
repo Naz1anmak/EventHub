@@ -2,6 +2,7 @@ package ru.practicum.eventhub.api.dto.request;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
 public record UserCreateDto(
@@ -11,6 +12,9 @@ public record UserCreateDto(
         String username,
 
         @Email(message = "Email должен быть корректным")
-        String email
+        String email,
+
+        @NotNull(message = "Metadata не должна быть null")
+        UserMetadataCreateDto metadata
 ) {
 }

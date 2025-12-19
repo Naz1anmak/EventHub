@@ -50,15 +50,11 @@ create table if not exists events (
   description varchar(255),
   event_date timestamptz,
   location text,
-  category_id uuid not null references categories(id),
-  created_by uuid not null references users(id),
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
     constraint chk_events_title_length check (char_length(title) between 3 and 100),
     constraint chk_events_description_length check (char_length(coalesce(description, '')) <= 255)
 );
-create index if not exists idx_events_category_id on events(category_id);
-create index if not exists idx_events_created_by on events(created_by);
 
 create table if not exists tags (
   id uuid primary key default gen_random_uuid(),

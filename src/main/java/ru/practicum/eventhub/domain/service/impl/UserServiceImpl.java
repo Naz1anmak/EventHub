@@ -14,6 +14,7 @@ import ru.practicum.eventhub.api.exception.ConflictException;
 import ru.practicum.eventhub.api.mapper.UserMapper;
 import ru.practicum.eventhub.domain.dto.PagedResponse;
 import ru.practicum.eventhub.domain.model.User;
+import ru.practicum.eventhub.domain.model.UserMetadata;
 import ru.practicum.eventhub.domain.repository.UserRepository;
 import ru.practicum.eventhub.domain.service.UserService;
 
@@ -31,6 +32,10 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public UserDto createUser(UserCreateDto dto) {
         User user = userMapper.fromCreateDto(dto);
+
+        UserMetadata metadata = UserMetadata.create(dto.metadata());
+        user.addMetadata(metadata);
+
         try {
             user = userRepository.save(user);
         } catch (DataIntegrityViolationException exception) {

@@ -19,7 +19,6 @@ public interface ProjectMapper {
     @Mapping(target = "updatedAt", ignore = true)
     @Mapping(target = "name", source = "createDto.name")
     @Mapping(target = "description", source = "createDto.description")
-    @Mapping(target = "category", source = "category")
     @Mapping(target = "owner", source = "owner")
     Project fromCreateDto(ProjectCreateDto createDto, Category category, User owner);
 

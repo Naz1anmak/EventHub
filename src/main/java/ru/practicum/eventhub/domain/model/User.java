@@ -37,4 +37,9 @@ public class User {
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     @JsonIgnore
     private UserMetadata metadata;
+
+    public void addMetadata(UserMetadata metadata) {
+        this.metadata = metadata;
+        metadata.setUser(this);
+    }
 }

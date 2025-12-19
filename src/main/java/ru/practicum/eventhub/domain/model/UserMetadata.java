@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+import ru.practicum.eventhub.api.dto.request.UserMetadataCreateDto;
 
 import java.time.OffsetDateTime;
 import java.util.UUID;
@@ -40,4 +41,13 @@ public class UserMetadata {
     @UpdateTimestamp
     @Column(name = "updated_at")
     private OffsetDateTime updatedAt;
+
+    public static UserMetadata create(UserMetadataCreateDto dto) {
+        UserMetadata metadata = new UserMetadata();
+        metadata.setFirstName(dto.firstName());
+        metadata.setLastName(dto.lastName());
+        metadata.setBio(dto.bio());
+        metadata.setPhone(dto.phone());
+        return metadata;
+    }
 }

@@ -8,18 +8,21 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.eventhub.api.dto.request.EventCreateDto;
 import ru.practicum.eventhub.api.dto.request.EventUpdateDto;
+import ru.practicum.eventhub.api.dto.request.TagCreateDto;
 import ru.practicum.eventhub.api.dto.response.EventDto;
 import ru.practicum.eventhub.api.mapper.EventMapper;
 import ru.practicum.eventhub.domain.dto.PagedResponse;
-import ru.practicum.eventhub.domain.model.Category;
 import ru.practicum.eventhub.domain.model.Event;
 import ru.practicum.eventhub.domain.model.Tag;
-import ru.practicum.eventhub.domain.model.User;
 import ru.practicum.eventhub.domain.repository.EventRepository;
+import ru.practicum.eventhub.domain.repository.TagRepository;
 import ru.practicum.eventhub.domain.service.EventService;
 
+import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -28,18 +31,15 @@ public class EventServiceImpl implements EventService {
     private final EventRepository eventRepository;
     private final EventReader eventReader;
     private final EventMapper eventMapper;
-    private final CategoryReader categoryReader;
-    private final UserReader userReader;
     private final TagReader tagReader;
+    private final TagRepository tagRepository;
 
     @Override
     @Transactional
     public EventDto createEvent(EventCreateDto dto) {
-        Category category = categoryReader.findById(dto.categoryId());
-        User user = userReader.findById(dto.createdBy());
-        Set<Tag> tags = tagReader.getTagsByIds(dto.tags());
+        Set<Tag> resultTags = getTags(dto);
 
-        Event event = eventMapper.fromCreateDto(dto, category, user, tags);
+        Event event = eventMapper.fromCreateDto(dto, resultTags);
         event = eventRepository.save(event);
 
         log.info("Создано событие с id={}", event.getId());
@@ -57,17 +57,6 @@ public class EventServiceImpl implements EventService {
 
     @Override
     @Transactional(readOnly = true)
-    public PagedResponse<EventDto> getEventsByUser(UUID userId, Pageable pageable) {
-        User user = userReader.findById(userId);
-        Page<Event> eventPage = eventRepository.findByCreatedBy(user, pageable);
-
-        log.info("Запрошены события пользователя {}: страница {}, размер {}",
-                userId, pageable.getPageNumber(), pageable.getPageSize());
-        return PagedResponse.from(eventPage, eventMapper::toDto);
-    }
-
-    @Override
-    @Transactional(readOnly = true)
     public EventDto getEventById(UUID id) {
         Event event = eventReader.findById(id);
         log.info("Запрошено событие с id={}", id);
@@ -79,16 +68,6 @@ public class EventServiceImpl implements EventService {
     public EventDto updateEvent(UUID id, EventUpdateDto dto) {
         Event event = eventReader.findById(id);
 
-        Category category = null;
-        if (dto.categoryId() != null) {
-            category = categoryReader.findById(dto.categoryId());
-        }
-
-        User user = null;
-        if (dto.createdBy() != null) {
-            user = userReader.findById(dto.createdBy());
-        }
-
         if (dto.tags() != null) {
             Set<Tag> tags = dto.tags().isEmpty() ? Set.of() : tagReader.getTagsByIds(dto.tags());
 
@@ -99,7 +78,7 @@ public class EventServiceImpl implements EventService {
             }
         }
 
-        eventMapper.updateEventFromDto(dto, event, category, user);
+        eventMapper.updateEventFromDto(dto, event);
         event = eventRepository.save(event);
 
         log.info("Обновлено событие с id={}", id);
@@ -112,5 +91,28 @@ public class EventServiceImpl implements EventService {
         eventReader.findById(id);
         eventRepository.deleteById(id);
         log.info("Удалено событие с id={}", id);
+    }
+
+    @Transactional
+    public Set<Tag> getTags(EventCreateDto dto) {
+        Set<String> names = dto.tags().stream()
+                .map(TagCreateDto::name)
+                .collect(Collectors.toSet());
+
+        Map<String, Tag> existingTags = tagReader.findByNames(names);
+
+        Set<Tag> resultTags = new HashSet<>();
+
+        for (TagCreateDto tagDto : dto.tags()) {
+            Tag tag = existingTags.get(tagDto.name());
+
+            if (tag == null) {
+                tag = Tag.create(tagDto);
+                tagRepository.save(tag);
+            }
+
+            resultTags.add(tag);
+        }
+        return resultTags;
     }
 }

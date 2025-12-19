@@ -9,15 +9,20 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.eventhub.api.dto.request.CategoryCreateDto;
 import ru.practicum.eventhub.api.dto.request.CategoryUpdateDto;
+import ru.practicum.eventhub.api.dto.request.ProjectCreateDto;
 import ru.practicum.eventhub.api.dto.response.CategoryDto;
 import ru.practicum.eventhub.api.exception.ConflictException;
 import ru.practicum.eventhub.api.mapper.CategoryMapper;
 import ru.practicum.eventhub.domain.dto.PagedResponse;
 import ru.practicum.eventhub.domain.model.Category;
+import ru.practicum.eventhub.domain.model.Project;
+import ru.practicum.eventhub.domain.model.User;
 import ru.practicum.eventhub.domain.repository.CategoryRepository;
 import ru.practicum.eventhub.domain.service.CategoryService;
 
+import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -26,11 +31,23 @@ public class CategoryServiceImpl implements CategoryService {
     private final CategoryRepository categoryRepository;
     private final CategoryMapper categoryMapper;
     private final CategoryReader categoryReader;
+    private final UserReader userReader;
 
     @Override
     @Transactional
     public CategoryDto createCategory(CategoryCreateDto dto) {
         Category category = categoryMapper.fromCreateDto(dto);
+
+        Map<UUID, User> usersByIds = userReader.getUsersByIds(dto.projects().stream()
+                .map(ProjectCreateDto::ownerId)
+                .collect(Collectors.toSet())
+        );
+
+        for (ProjectCreateDto pDto : dto.projects()) {
+            User owner = usersByIds.get(pDto.ownerId());
+            Project project = Project.create(pDto.name(), pDto.description(), owner);
+            category.addProject(project);
+        }
 
         try {
             category = categoryRepository.save(category);

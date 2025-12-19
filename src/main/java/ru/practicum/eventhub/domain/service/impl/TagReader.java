@@ -9,6 +9,7 @@ import ru.practicum.eventhub.domain.model.Tag;
 import ru.practicum.eventhub.domain.repository.TagRepository;
 
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -49,5 +50,14 @@ public class TagReader {
         }
 
         return tags;
+    }
+
+    public Map<String, Tag> findByNames(Set<String> names) {
+        if (names == null || names.isEmpty()) {
+            return Map.of();
+        }
+
+        Set<Tag> tags = new HashSet<>(tagRepository.findAllByNameIn(names));
+        return tags.stream().collect(Collectors.toMap(Tag::getName, tag -> tag));
     }
 }

@@ -34,17 +34,10 @@ public class EventTagController {
         return eventService.createEvent(dto);
     }
 
-    @GetMapping(params = "!userId")
+    @GetMapping
     public PagedResponse<EventDto> getEvents(@RequestParam(defaultValue = "0") @PositiveOrZero Integer page,
                                              @RequestParam(defaultValue = "10") @Positive Integer size) {
         return eventService.getEvents(PageRequest.of(page, size));
-    }
-
-    @GetMapping
-    public PagedResponse<EventDto> getEventsByUser(@RequestParam UUID userId,
-                                                   @RequestParam(defaultValue = "0") @PositiveOrZero Integer page,
-                                                   @RequestParam(defaultValue = "10") @Positive Integer size) {
-        return eventService.getEventsByUser(userId, PageRequest.of(page, size));
     }
 
     @GetMapping("/{eventId}")

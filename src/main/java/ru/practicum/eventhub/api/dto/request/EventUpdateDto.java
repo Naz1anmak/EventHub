@@ -20,8 +20,7 @@ public record EventUpdateDto(
         OffsetDateTime eventDate,
 
         String location,
-        UUID categoryId,
-        UUID createdBy,
+
         Set<UUID> tags,
         TagUpdateMode tagUpdateMode
 ) {

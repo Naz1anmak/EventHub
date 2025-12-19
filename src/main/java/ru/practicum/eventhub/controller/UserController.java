@@ -9,7 +9,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.eventhub.api.dto.request.UserCreateDto;
-import ru.practicum.eventhub.api.dto.request.UserMetadataCreateDto;
 import ru.practicum.eventhub.api.dto.request.UserMetadataUpdateDto;
 import ru.practicum.eventhub.api.dto.request.UserUpdateDto;
 import ru.practicum.eventhub.api.dto.response.UserDto;
@@ -56,13 +55,6 @@ public class UserController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteUser(@PathVariable UUID userId) {
         userService.deleteUser(userId);
-    }
-
-    @PostMapping("/{userId}/metadata")
-    @ResponseStatus(HttpStatus.CREATED)
-    public UserMetadataDto createMetadataForUser(@PathVariable UUID userId,
-                                                 @Valid @RequestBody UserMetadataCreateDto dto) {
-        return userMetadataService.createForUser(userId, dto);
     }
 
     @GetMapping("/metadata")

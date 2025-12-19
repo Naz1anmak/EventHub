@@ -13,8 +13,6 @@ public interface EventService {
 
     PagedResponse<EventDto> getEvents(Pageable pageable);
 
-    PagedResponse<EventDto> getEventsByUser(UUID userId, Pageable pageable);
-
     EventDto getEventById(UUID id);
 
     EventDto updateEvent(UUID id, EventUpdateDto dto);

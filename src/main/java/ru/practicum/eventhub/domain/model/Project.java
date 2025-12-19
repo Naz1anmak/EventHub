@@ -40,4 +40,12 @@ public class Project {
     @UpdateTimestamp
     @Column(name = "updated_at")
     private OffsetDateTime updatedAt;
+
+    public static Project create(String name, String description, User owner) {
+        Project project = new Project();
+        project.setName(name);
+        project.setDescription(description);
+        project.setOwner(owner);
+        return project;
+    }
 }
