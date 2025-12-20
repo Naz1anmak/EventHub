@@ -1,7 +1,6 @@
 package ru.practicum.eventhub.domain.service;
 
 import org.springframework.data.domain.Pageable;
-import ru.practicum.eventhub.api.dto.request.ProjectCreateDto;
 import ru.practicum.eventhub.api.dto.request.ProjectUpdateDto;
 import ru.practicum.eventhub.api.dto.response.ProjectDto;
 import ru.practicum.eventhub.domain.dto.PagedResponse;
@@ -9,8 +8,6 @@ import ru.practicum.eventhub.domain.dto.PagedResponse;
 import java.util.UUID;
 
 public interface ProjectService {
-    ProjectDto createForCategory(UUID categoryId, ProjectCreateDto dto);
-
     PagedResponse<ProjectDto> getProjectsByCategory(UUID categoryId, Pageable pageable);
 
     ProjectDto getProjectByCategory(UUID categoryId, UUID projectId);

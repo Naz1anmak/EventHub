@@ -33,9 +33,9 @@ create table if not exists categories (
 
 create table if not exists projects (
   id uuid primary key default gen_random_uuid(),
-  name varchar(100) not null,
+  name varchar(100) not null unique,
   description varchar(255),
-  category_id uuid not null references categories(id),
+  category_id uuid not null references categories(id) on delete restrict,
   owner_id uuid not null references users(id),
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),

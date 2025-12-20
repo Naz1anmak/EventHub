@@ -1,7 +1,6 @@
 package ru.practicum.eventhub.domain.model;
 
 import jakarta.persistence.*;
-import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
@@ -32,33 +31,28 @@ public class Event {
 
     private String location;
 
-    @Getter(AccessLevel.NONE)
     @ManyToMany
     @JoinTable(
             name = "event_tags",
             joinColumns = @JoinColumn(name = "event_id", nullable = false),
             inverseJoinColumns = @JoinColumn(name = "tag_id", nullable = false)
     )
-    private Set<Tag> tags = new HashSet<>();
-
-    public Set<Tag> getTags() {
-        return Collections.unmodifiableSet(tags);
-    }
+    private List<Tag> tags = new ArrayList<>();
 
     public void addTag(Tag tag) {
-        if (tag == null) return;
         tags.add(tag);
+        tag.getEvents().add(this);
     }
 
-    public void removeTag(Tag tag) {
-        if (tag == null) return;
-        tags.remove(tag);
-    }
-
-    public void setTags(Collection<Tag> newTags) {
-        this.tags.clear();
-        if (newTags != null) {
-            this.tags.addAll(newTags);
+    public void setTags(Set<Tag> newTags) {
+        Iterator<Tag> it = tags.iterator();
+        while (it.hasNext()) {
+            Tag old = it.next();
+            it.remove();
+            old.getEvents().remove(this);
+        }
+        for (Tag tag : newTags) {
+            addTag(tag);
         }
     }
 

@@ -8,9 +8,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.OffsetDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 @Entity
 @Table(name = "categories")
@@ -28,7 +26,7 @@ public class Category {
 
     private String description;
 
-    @OneToMany(mappedBy = "category", cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @OneToMany(mappedBy = "category", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Project> projects = new ArrayList<>();
 
     @CreationTimestamp
@@ -42,5 +40,17 @@ public class Category {
     public void addProject(Project project) {
         projects.add(project);
         project.setCategory(this);
+    }
+
+    public void setProjects(Set<Project> newProjects) {
+        Iterator<Project> it = projects.iterator();
+        while (it.hasNext()) {
+            Project old = it.next();
+            it.remove();
+            old.setCategory(null);
+        }
+        for (Project project : newProjects) {
+            addProject(project);
+        }
     }
 }

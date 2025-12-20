@@ -3,7 +3,7 @@ package ru.practicum.eventhub.api.dto.response;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 import java.time.OffsetDateTime;
-import java.util.Set;
+import java.util.List;
 import java.util.UUID;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -13,7 +13,7 @@ public record EventDto(
         String description,
         OffsetDateTime eventDate,
         String location,
-        Set<TagShortDto> tags
+        List<TagShortDto> tags
 ) {
     public record TagShortDto(UUID id, String name) {
     }

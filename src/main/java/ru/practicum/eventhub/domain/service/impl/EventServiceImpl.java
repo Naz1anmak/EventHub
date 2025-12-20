@@ -37,7 +37,7 @@ public class EventServiceImpl implements EventService {
     @Override
     @Transactional
     public EventDto createEvent(EventCreateDto dto) {
-        Set<Tag> resultTags = getTags(dto);
+        Set<Tag> resultTags = getTags(dto.tags());
 
         Event event = eventMapper.fromCreateDto(dto, resultTags);
         event = eventRepository.save(event);
@@ -68,15 +68,8 @@ public class EventServiceImpl implements EventService {
     public EventDto updateEvent(UUID id, EventUpdateDto dto) {
         Event event = eventReader.findById(id);
 
-        if (dto.tags() != null) {
-            Set<Tag> tags = dto.tags().isEmpty() ? Set.of() : tagReader.getTagsByIds(dto.tags());
-
-            if (dto.tagUpdateMode() != null) {
-                dto.tagUpdateMode().apply(event, tags);
-            } else {
-                event.setTags(tags);
-            }
-        }
+        Set<Tag> tags = getTags(dto.tags());
+        dto.updateMode().apply(event, tags);
 
         eventMapper.updateEventFromDto(dto, event);
         event = eventRepository.save(event);
@@ -94,16 +87,15 @@ public class EventServiceImpl implements EventService {
     }
 
     @Transactional
-    public Set<Tag> getTags(EventCreateDto dto) {
-        Set<String> names = dto.tags().stream()
+    public Set<Tag> getTags(Set<TagCreateDto> dtoTags) {
+        Set<String> names = dtoTags.stream()
                 .map(TagCreateDto::name)
                 .collect(Collectors.toSet());
 
         Map<String, Tag> existingTags = tagReader.findByNames(names);
 
         Set<Tag> resultTags = new HashSet<>();
-
-        for (TagCreateDto tagDto : dto.tags()) {
+        for (TagCreateDto tagDto : dtoTags) {
             Tag tag = existingTags.get(tagDto.name());
 
             if (tag == null) {

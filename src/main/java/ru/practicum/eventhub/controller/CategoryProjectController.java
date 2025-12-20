@@ -10,7 +10,6 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.eventhub.api.dto.request.CategoryCreateDto;
 import ru.practicum.eventhub.api.dto.request.CategoryUpdateDto;
-import ru.practicum.eventhub.api.dto.request.ProjectCreateDto;
 import ru.practicum.eventhub.api.dto.request.ProjectUpdateDto;
 import ru.practicum.eventhub.api.dto.response.CategoryDto;
 import ru.practicum.eventhub.api.dto.response.ProjectDto;
@@ -54,13 +53,6 @@ public class CategoryProjectController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteCategory(@PathVariable UUID categoryId) {
         categoryService.deleteCategory(categoryId);
-    }
-
-    @PostMapping("/{categoryId}/projects")
-    @ResponseStatus(HttpStatus.CREATED)
-    public ProjectDto createProjectForCategory(@PathVariable UUID categoryId,
-                                               @Valid @RequestBody ProjectCreateDto dto) {
-        return projectService.createForCategory(categoryId, dto);
     }
 
     @GetMapping("/{categoryId}/projects")

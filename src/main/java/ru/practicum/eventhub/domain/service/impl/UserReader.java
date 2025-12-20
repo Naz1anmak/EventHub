@@ -30,6 +30,7 @@ public class UserReader {
 
     public Map<UUID, User> getUsersByIds(Set<UUID> ids) {
         if (ids == null || ids.isEmpty()) {
+            log.info("Список id пользователей пустой, возвращается пустая мапа.");
             return Map.of();
         }
 

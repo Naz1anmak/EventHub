@@ -21,13 +21,6 @@ import java.util.stream.Collectors;
 public class TagReader {
     private final TagRepository tagRepository;
 
-    public Tag findById(UUID id) {
-        return tagRepository.findById(id).orElseThrow(() -> {
-            log.error("Тег с id={} не найден", id);
-            return new NotFoundException("Тег с id='" + id + "' не найден.");
-        });
-    }
-
     public Tag findByIdAndEventsId(UUID tagId, UUID eventId) {
         return tagRepository.findByIdAndEventsId(tagId, eventId).orElseThrow(() -> {
             log.error("Тег с id={} для события с id={} не найден", tagId, eventId);
@@ -35,25 +28,9 @@ public class TagReader {
         });
     }
 
-    public Set<Tag> getTagsByIds(Set<UUID> ids) {
-        if (ids == null || ids.isEmpty()) {
-            return Set.of();
-        }
-
-        Set<Tag> tags = new HashSet<>(tagRepository.findAllById(ids));
-        if (tags.size() != ids.size()) {
-            Set<UUID> foundIds = tags.stream().map(Tag::getId).collect(Collectors.toSet());
-            Set<UUID> missing = new HashSet<>(ids);
-            missing.removeAll(foundIds);
-            log.error("Не найдены теги c id={}", missing);
-            throw new NotFoundException("Не найдены теги c id=" + missing);
-        }
-
-        return tags;
-    }
-
     public Map<String, Tag> findByNames(Set<String> names) {
         if (names == null || names.isEmpty()) {
+            log.info("Набор имен тегов пустой, возвращается пустая мапа");
             return Map.of();
         }
 

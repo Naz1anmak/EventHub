@@ -21,6 +21,7 @@ import ru.practicum.eventhub.domain.repository.CategoryRepository;
 import ru.practicum.eventhub.domain.service.CategoryService;
 
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -38,13 +39,10 @@ public class CategoryServiceImpl implements CategoryService {
     public CategoryDto createCategory(CategoryCreateDto dto) {
         Category category = categoryMapper.fromCreateDto(dto);
 
-        Map<UUID, User> usersByIds = userReader.getUsersByIds(dto.projects().stream()
-                .map(ProjectCreateDto::ownerId)
-                .collect(Collectors.toSet())
-        );
+        Map<UUID, User> owners = getUserMap(dto.projects());
 
         for (ProjectCreateDto pDto : dto.projects()) {
-            User owner = usersByIds.get(pDto.ownerId());
+            User owner = owners.get(pDto.ownerId());
             Project project = Project.create(pDto.name(), pDto.description(), owner);
             category.addProject(project);
         }
@@ -82,6 +80,18 @@ public class CategoryServiceImpl implements CategoryService {
     @Transactional
     public CategoryDto updateCategory(UUID id, CategoryUpdateDto dto) {
         Category category = categoryReader.findById(id);
+
+        Map<UUID, User> owners = getUserMap(dto.projects());
+
+        Set<Project> projects = dto.projects().stream()
+                .map(pDto -> {
+                    User owner = owners.get(pDto.ownerId());
+                    return Project.create(pDto.name(), pDto.description(), owner);
+                })
+                .collect(Collectors.toSet());
+
+        dto.updateMode().apply(category, projects);
+
         categoryMapper.updateCategoryFromDto(dto, category);
 
         try {
@@ -101,5 +111,13 @@ public class CategoryServiceImpl implements CategoryService {
         categoryReader.findById(id);
         categoryRepository.deleteById(id);
         log.info("Удалена категория с id={}", id);
+    }
+
+    @Transactional(readOnly = true)
+    public Map<UUID, User> getUserMap(Set<ProjectCreateDto> dto) {
+        return userReader.getUsersByIds(dto.stream()
+                .map(ProjectCreateDto::ownerId)
+                .collect(Collectors.toSet())
+        );
     }
 }

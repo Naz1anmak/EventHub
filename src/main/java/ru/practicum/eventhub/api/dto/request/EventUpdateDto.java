@@ -6,7 +6,6 @@ import ru.practicum.eventhub.domain.model.TagUpdateMode;
 
 import java.time.OffsetDateTime;
 import java.util.Set;
-import java.util.UUID;
 
 public record EventUpdateDto(
 
@@ -21,7 +20,16 @@ public record EventUpdateDto(
 
         String location,
 
-        Set<UUID> tags,
-        TagUpdateMode tagUpdateMode
+        Set<TagCreateDto> tags,
+        TagUpdateMode updateMode
 ) {
+    public EventUpdateDto {
+        if (tags == null) {
+            tags = Set.of();
+        }
+
+        if (updateMode == null) {
+            updateMode = TagUpdateMode.ADD;
+        }
+    }
 }

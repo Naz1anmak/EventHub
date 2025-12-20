@@ -9,9 +9,8 @@ import org.hibernate.annotations.UpdateTimestamp;
 import ru.practicum.eventhub.api.dto.request.TagCreateDto;
 
 import java.time.OffsetDateTime;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -39,11 +38,7 @@ public class Tag {
     private OffsetDateTime updatedAt;
 
     @ManyToMany(mappedBy = "tags")
-    private Set<Event> events = new HashSet<>();
-
-    public Set<Event> getEvents() {
-        return Collections.unmodifiableSet(events);
-    }
+    private List<Event> events = new ArrayList<>();
 
     public static Tag create(TagCreateDto dto) {
         Tag tag = new Tag();

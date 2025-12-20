@@ -6,7 +6,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.practicum.eventhub.api.dto.request.ProjectCreateDto;
 import ru.practicum.eventhub.api.dto.request.ProjectUpdateDto;
 import ru.practicum.eventhub.api.dto.response.ProjectDto;
 import ru.practicum.eventhub.api.mapper.ProjectMapper;
@@ -28,19 +27,6 @@ public class ProjectServiceImpl implements ProjectService {
     private final CategoryReader categoryReader;
     private final UserReader userReader;
     private final ProjectReader projectReader;
-
-    @Override
-    @Transactional
-    public ProjectDto createForCategory(UUID categoryId, ProjectCreateDto dto) {
-        Category category = categoryReader.findById(categoryId);
-        User owner = userReader.findById(dto.ownerId());
-
-        Project project = projectMapper.fromCreateDto(dto, category, owner);
-        project = projectRepository.save(project);
-
-        log.info("Создан проект с id={}", project.getId());
-        return projectMapper.toDto(project);
-    }
 
     @Override
     @Transactional(readOnly = true)

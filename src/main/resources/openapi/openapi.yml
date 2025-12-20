@@ -543,48 +543,6 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
 
   /categories/v1/api/{categoryId}/projects:
-    post:
-      tags:
-        - project
-      summary: Создать проект в категории
-      parameters:
-        - in: path
-          name: categoryId
-          required: true
-          schema:
-            type: string
-            format: uuid
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/ProjectCreateDto'
-      responses:
-        '201':
-          description: Проект успешно создан
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ProjectDto'
-        '400':
-          description: Некорректные данные запроса
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-        '404':
-          description: Категория не найдена
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-        '500':
-          description: Внутренняя ошибка сервера
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
     get:
       tags:
         - project
@@ -1233,7 +1191,7 @@ components:
           example: "Москва, ул. Ленина, 10"
         tags:
           type: array
-          description: Список идентификаторов тегов
+          description: Список дто тегов
           items:
             $ref: '#/components/schemas/TagCreateDto'
 
@@ -1266,11 +1224,11 @@ components:
             type: string
             format: uuid
             example: "c1d2e3f4-5678-1234-abcd-9876543210ab"
-        tagUpdateMode:
+        updateMode:
           type: string
-          enum: [ REPLACE, ADD, REMOVE ]
+          enum: [ REPLACE, ADD ]
           description: Режим обновления тегов
-          example: "REPLACE"
+          example: "ADD"
 
     CategoryCreateDto:
       type: object
@@ -1291,7 +1249,7 @@ components:
           type: array
           description: Список проектов в категории
           items:
-            $ref: '#/components/schemas/ProjectNestedCreateDto'
+            $ref: '#/components/schemas/ProjectCreateDto'
 
     CategoryUpdateDto:
       type: object
@@ -1306,6 +1264,16 @@ components:
           maxLength: 255
           description: Новое описание категории
           example: "Категория для образовательных мероприятий."
+        projects:
+          type: array
+          description: Cписок идентификаторов проектов
+          items:
+            $ref: '#/components/schemas/ProjectCreateDto'
+        updateMode:
+          type: string
+          enum: [ REPLACE, ADD ]
+          description: Режим добавления проектов в категорию
+          example: "ADD"
 
     TagCreateDto:
       type: object
@@ -1415,27 +1383,6 @@ components:
           example: "+7-888-654-32-10"
 
     ProjectCreateDto:
-      type: object
-      required: [ name, ownerId ]
-      properties:
-        name:
-          type: string
-          minLength: 3
-          maxLength: 100
-          description: Название проекта
-          example: "EventHub"
-        description:
-          type: string
-          maxLength: 255
-          description: Описание проекта
-          example: "Платформа для организации событий."
-        ownerId:
-          type: string
-          format: uuid
-          description: Идентификатор владельца
-          example: "a1234567-89ab-cdef-0123-456789abcdef"
-
-    ProjectNestedCreateDto:
       type: object
       required: [ name, ownerId ]
       properties:
