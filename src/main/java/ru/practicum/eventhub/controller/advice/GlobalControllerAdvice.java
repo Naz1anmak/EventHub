@@ -1,5 +1,6 @@
 package ru.practicum.eventhub.controller.advice;
 
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
@@ -14,7 +15,10 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.HandlerMethodValidationException;
 import org.springframework.web.servlet.NoHandlerFoundException;
-import ru.practicum.eventhub.api.exception.*;
+import ru.practicum.eventhub.api.exception.BadRequestException;
+import ru.practicum.eventhub.api.exception.ConflictException;
+import ru.practicum.eventhub.api.exception.ErrorResponse;
+import ru.practicum.eventhub.api.exception.ForbiddenException;
 
 import java.util.stream.Collectors;
 
@@ -22,9 +26,9 @@ import java.util.stream.Collectors;
 @RestControllerAdvice
 public class GlobalControllerAdvice {
 
-    @ExceptionHandler(NotFoundException.class)
+    @ExceptionHandler(EntityNotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    public ErrorResponse handleNotFoundException(NotFoundException exception, HttpServletRequest request) {
+    public ErrorResponse handleNotFoundException(Exception exception, HttpServletRequest request) {
         return buildResponse(HttpStatus.NOT_FOUND, exception, request);
     }
 
@@ -44,12 +48,6 @@ public class GlobalControllerAdvice {
     @ResponseStatus(HttpStatus.CONFLICT)
     public ErrorResponse handleConflictException(ConflictException exception, HttpServletRequest request) {
         return buildResponse(HttpStatus.CONFLICT, exception, request);
-    }
-
-    @ExceptionHandler(ValidationException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse handleValidationException(ValidationException exception, HttpServletRequest request) {
-        return buildResponse(HttpStatus.BAD_REQUEST, exception, request);
     }
 
     @ExceptionHandler(ConstraintViolationException.class)

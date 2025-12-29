@@ -6,13 +6,12 @@ import java.util.UUID;
 
 public record ProjectUpdateDto(
 
-        @Size(max = 100, message = "Иmя должно быть до 100 символов")
+        @Size(min = 3, max = 100, message = "Иmя должно быть от 3 до 100 символов")
         String name,
 
         @Size(max = 255, message = "Описание должно быть до 255 символов")
         String description,
 
-        UUID categoryId,
         UUID ownerId
 ) {
 }

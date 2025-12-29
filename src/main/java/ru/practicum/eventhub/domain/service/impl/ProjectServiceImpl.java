@@ -15,6 +15,7 @@ import ru.practicum.eventhub.domain.model.Project;
 import ru.practicum.eventhub.domain.model.User;
 import ru.practicum.eventhub.domain.repository.ProjectRepository;
 import ru.practicum.eventhub.domain.service.ProjectService;
+import ru.practicum.eventhub.domain.util.PageValidator;
 
 import java.util.UUID;
 
@@ -24,23 +25,28 @@ import java.util.UUID;
 public class ProjectServiceImpl implements ProjectService {
     private final ProjectRepository projectRepository;
     private final ProjectMapper projectMapper;
-    private final CategoryReader categoryReader;
-    private final UserReader userReader;
-    private final ProjectReader projectReader;
+    private final UserReadService userReadService;
+    private final ProjectReadService projectReadService;
+    private final CategoryReadService categoryReadService;
 
     @Override
     @Transactional(readOnly = true)
     public PagedResponse<ProjectDto> getProjectsByCategory(UUID categoryId, Pageable pageable) {
-        Page<Project> projectPage = projectRepository.findAllByCategoryId(categoryId, pageable);
+        categoryReadService.findById(categoryId);
+        Page<Project> page = projectRepository.findAllByCategoryId(categoryId, pageable);
+
+        PageValidator.validatePage(page);
 
         log.info("Получены проекты: страница {}, размер {}", pageable.getPageNumber(), pageable.getPageSize());
-        return PagedResponse.from(projectPage, projectMapper::toDto);
+        return PagedResponse.from(page, projectMapper::toDto);
     }
 
     @Override
     @Transactional(readOnly = true)
     public ProjectDto getProjectByCategory(UUID categoryId, UUID projectId) {
-        Project project = projectReader.findByIdAndCategoryId(projectId, categoryId);
+        categoryReadService.findById(categoryId);
+        Project project = projectReadService.findByIdAndCategoryId(projectId, categoryId);
+
         log.info("Запрошен проект с id={} в категории с id={}", projectId, categoryId);
         return projectMapper.toDto(project);
     }
@@ -48,30 +54,31 @@ public class ProjectServiceImpl implements ProjectService {
     @Override
     @Transactional
     public ProjectDto updateForCategory(UUID categoryId, UUID projectId, ProjectUpdateDto dto) {
-        Project project = projectReader.findByIdAndCategoryId(projectId, categoryId);
+        categoryReadService.findById(categoryId);
+        Project project = projectReadService.findByIdAndCategoryId(projectId, categoryId);
+        if (dto.name() != null && !dto.name().equals(project.getName())) {
+            projectReadService.checkExistsByName(dto.name());
+        }
 
         User owner = null;
         if (dto.ownerId() != null) {
-            owner = userReader.findById(dto.ownerId());
+            owner = userReadService.findById(dto.ownerId());
         }
 
-        Category category = null;
-        if (dto.categoryId() != null) {
-            category = categoryReader.findById(dto.categoryId());
-        }
-
-        projectMapper.updateProjectFromDto(dto, project, category, owner);
+        project = projectMapper.updateProjectFromDto(dto, project, owner);
         project = projectRepository.save(project);
 
-        log.info("Обновлен проект с id={} в категории с id={}", projectId, dto.categoryId());
+        log.info("Обновлен проект с id={}", projectId);
         return projectMapper.toDto(project);
     }
 
     @Override
     @Transactional
     public void deleteForCategory(UUID categoryId, UUID projectId) {
-        projectReader.findByIdAndCategoryId(projectId, categoryId);
-        projectRepository.deleteById(projectId);
+        Category category = categoryReadService.findById(categoryId);
+        Project project = projectReadService.findByIdAndCategoryId(projectId, categoryId);
+
+        category.removeProject(project);
         log.info("Удален проект с id={} в категории с id={}", projectId, categoryId);
     }
 }

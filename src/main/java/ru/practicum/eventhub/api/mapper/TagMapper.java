@@ -1,12 +1,16 @@
 package ru.practicum.eventhub.api.mapper;
 
-import org.mapstruct.*;
+import org.mapstruct.BeanMapping;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
 import ru.practicum.eventhub.api.dto.request.TagCreateDto;
 import ru.practicum.eventhub.api.dto.request.TagUpdateDto;
 import ru.practicum.eventhub.api.dto.response.TagDto;
 import ru.practicum.eventhub.domain.model.Tag;
 
 import static org.mapstruct.MappingConstants.ComponentModel.SPRING;
+import static org.mapstruct.NullValuePropertyMappingStrategy.IGNORE;
 
 @Mapper(componentModel = SPRING)
 public interface TagMapper {
@@ -18,10 +22,10 @@ public interface TagMapper {
     @Mapping(target = "events", ignore = true)
     Tag fromCreateDto(TagCreateDto createDto);
 
-    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+    @BeanMapping(nullValuePropertyMappingStrategy = IGNORE)
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
     @Mapping(target = "events", ignore = true)
-    void updateTagFromDto(TagUpdateDto updateDto, @MappingTarget Tag tag);
+    Tag updateTagFromDto(TagUpdateDto updateDto, @MappingTarget Tag tag);
 }

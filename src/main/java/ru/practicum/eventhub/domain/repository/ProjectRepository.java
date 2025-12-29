@@ -16,4 +16,6 @@ public interface ProjectRepository extends JpaRepository<Project, UUID> {
 
     @EntityGraph(attributePaths = {"category", "owner"})
     Optional<Project> findByIdAndCategoryId(UUID projectId, UUID categoryId);
+
+    boolean existsByName(String name);
 }

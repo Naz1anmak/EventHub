@@ -1,96 +1,128 @@
 package ru.practicum.eventhub.controller;
 
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.Positive;
-import jakarta.validation.constraints.PositiveOrZero;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
-import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.*;
-import ru.practicum.eventhub.api.dto.request.EventCreateDto;
-import ru.practicum.eventhub.api.dto.request.EventUpdateDto;
-import ru.practicum.eventhub.api.dto.request.TagCreateDto;
-import ru.practicum.eventhub.api.dto.request.TagUpdateDto;
-import ru.practicum.eventhub.api.dto.response.EventDto;
-import ru.practicum.eventhub.api.dto.response.TagDto;
-import ru.practicum.eventhub.domain.dto.PagedResponse;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.RestController;
+import ru.practicum.eventhub.api.EventsApi;
+import ru.practicum.eventhub.api.mapper.EventApiMapper;
+import ru.practicum.eventhub.api.mapper.TagApiMapper;
+import ru.practicum.eventhub.api.model.*;
 import ru.practicum.eventhub.domain.service.EventService;
 import ru.practicum.eventhub.domain.service.TagService;
 
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/events/v1/api")
-@Validated
 @RequiredArgsConstructor
-public class EventTagController {
+public class EventTagController implements EventsApi {
     private final EventService eventService;
     private final TagService tagService;
+    private final EventApiMapper eventApiMapper;
+    private final TagApiMapper tagApiMapper;
 
-    @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
-    public EventDto createEvent(@Valid @RequestBody EventCreateDto dto) {
-        return eventService.createEvent(dto);
+    @Override
+    public ResponseEntity<TagDto> addTagToEvent(UUID eventId, UUID tagId) {
+        var serviceDto = tagService.addTagToEvent(eventId, tagId);
+        var apiDto = tagApiMapper.toApiDto(serviceDto);
+
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(apiDto);
     }
 
-    @GetMapping
-    public PagedResponse<EventDto> getEvents(@RequestParam(defaultValue = "0") @PositiveOrZero Integer page,
-                                             @RequestParam(defaultValue = "10") @Positive Integer size) {
-        return eventService.getEvents(PageRequest.of(page, size));
+    @Override
+    public ResponseEntity<EventDto> createEvent(EventCreateDto eventCreateDto) {
+        var serviceCreateDto = eventApiMapper.toServiceDto(eventCreateDto);
+        var serviceResult = eventService.createEvent(serviceCreateDto);
+        var apiResult = eventApiMapper.toApiDto(serviceResult);
+
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(apiResult);
     }
 
-    @GetMapping("/{eventId}")
-    public EventDto getEventById(@PathVariable UUID eventId) {
-        return eventService.getEventById(eventId);
+    @Override
+    public ResponseEntity<TagDto> createTag(TagCreateDto tagCreateDto) {
+        var serviceCreateDto = tagApiMapper.toServiceDto(tagCreateDto);
+        var serviceResult = tagService.createTag(serviceCreateDto);
+        var apiResult = tagApiMapper.toApiDto(serviceResult);
+
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(apiResult);
     }
 
-    @PatchMapping("/{eventId}")
-    public EventDto updateEvent(@PathVariable UUID eventId, @Valid @RequestBody EventUpdateDto dto) {
-        return eventService.updateEvent(eventId, dto);
-    }
-
-    @DeleteMapping("/{eventId}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteEvent(@PathVariable UUID eventId) {
+    @Override
+    public ResponseEntity<Void> deleteEvent(UUID eventId) {
         eventService.deleteEvent(eventId);
+        return ResponseEntity
+                .status(HttpStatus.NO_CONTENT)
+                .build();
     }
 
-    @PostMapping("/tags")
-    @ResponseStatus(HttpStatus.CREATED)
-    public TagDto createTag(@Valid @RequestBody TagCreateDto dto) {
-        return tagService.createTag(dto);
+    @Override
+    public ResponseEntity<Void> deleteTag(UUID tagId) {
+        tagService.deleteTag(tagId);
+        return ResponseEntity
+                .status(HttpStatus.NO_CONTENT)
+                .build();
     }
 
-    @GetMapping("/tags")
-    public PagedResponse<TagDto> getTags(@RequestParam(defaultValue = "0") @PositiveOrZero Integer page,
-                                         @RequestParam(defaultValue = "10") @Positive Integer size) {
-        return tagService.getTags(PageRequest.of(page, size));
-    }
-
-    @GetMapping("/{eventId}/tags")
-    public PagedResponse<TagDto> getTagsByEvent(@PathVariable UUID eventId,
-                                                @RequestParam(defaultValue = "0") @PositiveOrZero Integer page,
-                                                @RequestParam(defaultValue = "10") @Positive Integer size) {
-        return tagService.getTagsByEvent(eventId, PageRequest.of(page, size));
-    }
-
-    @GetMapping("/{eventId}/tags/{tagId}")
-    public TagDto getTagByEvent(@PathVariable UUID eventId, @PathVariable UUID tagId) {
-        return tagService.getTagByEvent(eventId, tagId);
-    }
-
-    @PatchMapping("/{eventId}/tags/{tagId}")
-    public TagDto updateTagForEvent(@PathVariable UUID eventId,
-                                    @PathVariable UUID tagId,
-                                    @Valid @RequestBody TagUpdateDto dto) {
-        return tagService.updateForEvent(eventId, tagId, dto);
-    }
-
-    @DeleteMapping("/{eventId}/tags/{tagId}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteTagForEvent(@PathVariable UUID eventId,
-                                  @PathVariable UUID tagId) {
+    @Override
+    public ResponseEntity<Void> deleteTagForEvent(UUID eventId, UUID tagId) {
         tagService.deleteForEvent(eventId, tagId);
+        return ResponseEntity
+                .status(HttpStatus.NO_CONTENT)
+                .build();
+    }
+
+    @Override
+    public ResponseEntity<EventDto> getEventById(UUID eventId) {
+        var serviceDto = eventService.getEventById(eventId);
+        return ResponseEntity.ok(eventApiMapper.toApiDto(serviceDto));
+    }
+
+    @Override
+    public ResponseEntity<PagedEventDtoResponse> getEvents(Integer page, Integer size) {
+        var servicePage = eventService.getEvents(PageRequest.of(page, size));
+        return ResponseEntity.ok(eventApiMapper.toApiPage(servicePage));
+    }
+
+    @Override
+    public ResponseEntity<TagDto> getTagByEventId(UUID eventId, UUID tagId) {
+        var serviceDto = tagService.getTagByEvent(eventId, tagId);
+        return ResponseEntity.ok(tagApiMapper.toApiDto(serviceDto));
+    }
+
+    @Override
+    public ResponseEntity<PagedTagDtoResponse> getTags(Integer page, Integer size) {
+        var servicePage = tagService.getTags(PageRequest.of(page, size));
+        return ResponseEntity.ok(tagApiMapper.toApiPage(servicePage));
+    }
+
+    @Override
+    public ResponseEntity<PagedTagDtoResponse> getTagsByEventId(UUID eventId, Integer page, Integer size) {
+        var servicePage = tagService.getTagsByEvent(eventId, PageRequest.of(page, size));
+        return ResponseEntity.ok(tagApiMapper.toApiPage(servicePage));
+    }
+
+    @Override
+    public ResponseEntity<EventDto> updateEvent(UUID eventId, EventUpdateDto eventUpdateDto) {
+        var serviceUpdateDto = eventApiMapper.toServiceDto(eventUpdateDto);
+        var serviceResult = eventService.updateEvent(eventId, serviceUpdateDto);
+        var apiResult = eventApiMapper.toApiDto(serviceResult);
+
+        return ResponseEntity.ok(apiResult);
+    }
+
+    @Override
+    public ResponseEntity<TagDto> updateTag(UUID tagId, TagUpdateDto tagUpdateDto) {
+        var serviceUpdateDto = tagApiMapper.toServiceDto(tagUpdateDto);
+        var serviceResult = tagService.updateTag(tagId, serviceUpdateDto);
+        var apiResult = tagApiMapper.toApiDto(serviceResult);
+
+        return ResponseEntity.ok(apiResult);
     }
 }

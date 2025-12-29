@@ -12,4 +12,6 @@ public record ProjectDto(
         CategoryShortDto category,
         UserShortDto owner
 ) {
+    public record CategoryShortDto(UUID id, String name) {
+    }
 }

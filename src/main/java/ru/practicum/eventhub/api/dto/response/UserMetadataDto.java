@@ -11,7 +11,7 @@ public record UserMetadataDto(
         UserShortDto user,
         String firstName,
         String lastName,
-        String bio,
+        String address,
         String phone,
         OffsetDateTime createdAt,
         OffsetDateTime updatedAt

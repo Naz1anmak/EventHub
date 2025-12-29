@@ -1,6 +1,5 @@
 package ru.practicum.eventhub.domain.dto;
 
-
 import org.springframework.data.domain.Page;
 
 import java.util.List;

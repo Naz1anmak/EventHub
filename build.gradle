@@ -2,6 +2,7 @@ plugins {
     id 'java'
     id 'org.springframework.boot' version '3.5.7'
     id 'io.spring.dependency-management' version '1.1.7'
+    id 'org.openapi.generator' version '7.18.0'
 }
 
 group = 'ru.practicum'
@@ -32,6 +33,7 @@ dependencies {
     implementation "org.mapstruct:mapstruct:${mapstructVersion}"
     implementation 'org.flywaydb:flyway-core'
     implementation 'org.flywaydb:flyway-database-postgresql'
+    implementation "io.swagger.core.v3:swagger-annotations:${swaggerVersion}"
     compileOnly 'org.projectlombok:lombok'
     runtimeOnly 'org.postgresql:postgresql'
     annotationProcessor 'org.projectlombok:lombok'
@@ -41,6 +43,35 @@ dependencies {
     testImplementation 'org.testcontainers:junit-jupiter'
     testImplementation 'org.testcontainers:postgresql'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+openApiGenerate {
+    generatorName = "spring"
+    inputSpec = "$rootDir/src/main/resources/openapi/openapi.yml"
+    outputDir = layout.buildDirectory.dir("generated").get().asFile.absolutePath
+    apiPackage = "ru.practicum.eventhub.api"
+    modelPackage = "ru.practicum.eventhub.api.model"
+
+    configOptions = [
+            interfaceOnly       : "true",
+            skipDefaultInterface: "true",
+            useSpringBoot3      : "true",
+            useBeanValidation   : "true",
+            dateLibrary         : "java8",
+            openApiNullable     : "false"
+    ]
+}
+
+sourceSets {
+    main {
+        java {
+            srcDir "$buildDir/generated/src/main/java"
+        }
+    }
+}
+
+tasks.named('compileJava') {
+    dependsOn tasks.openApiGenerate
 }
 
 tasks.named('test') {

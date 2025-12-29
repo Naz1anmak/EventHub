@@ -13,6 +13,8 @@ public record EventDto(
         String description,
         OffsetDateTime eventDate,
         String location,
+        OffsetDateTime createdAt,
+        OffsetDateTime updatedAt,
         List<TagShortDto> tags
 ) {
     public record TagShortDto(UUID id, String name) {

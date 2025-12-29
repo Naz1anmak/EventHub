@@ -22,8 +22,10 @@ public class User {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
+    @Column(length = 50, nullable = false, unique = true)
     private String username;
 
+    @Column(unique = true)
     private String email;
 
     @CreationTimestamp
@@ -34,11 +36,11 @@ public class User {
     @Column(name = "updated_at")
     private OffsetDateTime updatedAt;
 
-    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnore
     private UserMetadata metadata;
 
-    public void addMetadata(UserMetadata metadata) {
+    public void setMetadata(UserMetadata metadata) {
         this.metadata = metadata;
         metadata.setUser(this);
     }

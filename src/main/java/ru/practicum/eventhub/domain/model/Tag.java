@@ -6,7 +6,6 @@ import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
-import ru.practicum.eventhub.api.dto.request.TagCreateDto;
 
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
@@ -24,7 +23,7 @@ public class Tag {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @Column(nullable = false, unique = true)
+    @Column(length = 50, nullable = false, unique = true)
     private String name;
 
     private String description;
@@ -39,11 +38,4 @@ public class Tag {
 
     @ManyToMany(mappedBy = "tags")
     private List<Event> events = new ArrayList<>();
-
-    public static Tag create(TagCreateDto dto) {
-        Tag tag = new Tag();
-        tag.setName(dto.name());
-        tag.setDescription(dto.description());
-        return tag;
-    }
 }

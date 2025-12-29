@@ -8,7 +8,9 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.OffsetDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 
 @Entity
 @Table(name = "categories")
@@ -21,7 +23,7 @@ public class Category {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @Column(nullable = false, unique = true)
+    @Column(length = 100, nullable = false, unique = true)
     private String name;
 
     private String description;
@@ -42,15 +44,8 @@ public class Category {
         project.setCategory(this);
     }
 
-    public void setProjects(Set<Project> newProjects) {
-        Iterator<Project> it = projects.iterator();
-        while (it.hasNext()) {
-            Project old = it.next();
-            it.remove();
-            old.setCategory(null);
-        }
-        for (Project project : newProjects) {
-            addProject(project);
-        }
+    public void removeProject(Project project) {
+        projects.remove(project);
+        project.setCategory(null);
     }
 }

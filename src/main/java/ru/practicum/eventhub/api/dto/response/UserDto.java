@@ -10,6 +10,7 @@ public record UserDto(
         UUID id,
         String username,
         String email,
-        OffsetDateTime createdAt
+        OffsetDateTime createdAt,
+        OffsetDateTime updatedAt
 ) {
 }

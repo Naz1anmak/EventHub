@@ -1,5 +1,6 @@
 package ru.practicum.eventhub.domain.repository;
 
+import lombok.NonNull;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;
@@ -12,5 +13,6 @@ public interface EventRepository extends JpaRepository<Event, UUID> {
 
     @Override
     @EntityGraph(attributePaths = {"tags"})
-    Page<Event> findAll(Pageable pageable);
+    @NonNull
+    Page<Event> findAll(@NonNull Pageable pageable);
 }

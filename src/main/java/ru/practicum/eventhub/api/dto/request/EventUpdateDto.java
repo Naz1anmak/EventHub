@@ -1,15 +1,15 @@
 package ru.practicum.eventhub.api.dto.request;
 
 import jakarta.validation.constraints.FutureOrPresent;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
-import ru.practicum.eventhub.domain.model.TagUpdateMode;
 
 import java.time.OffsetDateTime;
 import java.util.Set;
 
 public record EventUpdateDto(
 
-        @Size(max = 100, message = "Заголовок должен быть до 100 символов")
+        @Size(min = 3, max = 100, message = "Заголовок должен быть от 3 до 100 символов")
         String title,
 
         @Size(max = 255, message = "Описание не должно превышать 255 символов")
@@ -20,16 +20,7 @@ public record EventUpdateDto(
 
         String location,
 
-        Set<TagCreateDto> tags,
-        TagUpdateMode updateMode
+        @NotNull(message = "Список тегов не должен быть null")
+        Set<TagCreateDto> tags
 ) {
-    public EventUpdateDto {
-        if (tags == null) {
-            tags = Set.of();
-        }
-
-        if (updateMode == null) {
-            updateMode = TagUpdateMode.ADD;
-        }
-    }
 }

@@ -2,7 +2,6 @@ package ru.practicum.eventhub.domain.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -11,13 +10,15 @@ import ru.practicum.eventhub.api.dto.request.TagCreateDto;
 import ru.practicum.eventhub.api.dto.request.TagUpdateDto;
 import ru.practicum.eventhub.api.dto.response.TagDto;
 import ru.practicum.eventhub.api.exception.ConflictException;
-import ru.practicum.eventhub.api.exception.NotFoundException;
 import ru.practicum.eventhub.api.mapper.TagMapper;
 import ru.practicum.eventhub.domain.dto.PagedResponse;
+import ru.practicum.eventhub.domain.model.Event;
 import ru.practicum.eventhub.domain.model.Tag;
 import ru.practicum.eventhub.domain.repository.TagRepository;
 import ru.practicum.eventhub.domain.service.TagService;
+import ru.practicum.eventhub.domain.util.PageValidator;
 
+import java.util.Iterator;
 import java.util.UUID;
 
 @Slf4j
@@ -26,77 +27,105 @@ import java.util.UUID;
 public class TagServiceImpl implements TagService {
     private final TagRepository tagRepository;
     private final TagMapper tagMapper;
-    private final TagReader tagReader;
+    private final TagReadService tagReadService;
+    private final EventReadService eventReadService;
 
     @Override
     @Transactional
     public TagDto createTag(TagCreateDto dto) {
+        tagReadService.checkExistsByName(dto.name());
         Tag tag = tagMapper.fromCreateDto(dto);
 
-        try {
-            tag = tagRepository.save(tag);
-        } catch (DataIntegrityViolationException exception) {
-            log.error(exception.getMessage(), exception);
-            throw new ConflictException("Тег с именем '" + dto.name() + "' уже существует.");
+        tag = tagRepository.save(tag);
+        log.info("Создан тег с id={}", tag.getId());
+        return tagMapper.toDto(tag);
+    }
+
+    @Override
+    @Transactional
+    public TagDto addTagToEvent(UUID eventId, UUID tagId) {
+        Event event = eventReadService.findById(eventId);
+        Tag tag = tagReadService.findById(tagId);
+
+        if (tagReadService.existsByIdAndEventsId(tagId, eventId)) {
+            log.error("Тег с id={} уже добавлен к событию с id={}", tagId, eventId);
+            throw new ConflictException("Тег с id=" + tagId + " уже добавлен к событию с id=" + eventId);
         }
 
-        log.info("Создан тег с id={}", tag.getId());
+        event.addTag(tag);
+        log.info("Тег с id={} добавлен к событию с id={}", tagId, eventId);
         return tagMapper.toDto(tag);
     }
 
     @Override
     @Transactional(readOnly = true)
     public PagedResponse<TagDto> getTags(Pageable pageable) {
-        Page<Tag> tagPage = tagRepository.findAll(pageable);
+        Page<Tag> page = tagRepository.findAll(pageable);
+        PageValidator.validatePage(page);
 
         log.info("Запрошены теги: страница {}, размер {}", pageable.getPageNumber(), pageable.getPageSize());
-        return PagedResponse.from(tagPage, tagMapper::toDto);
+        return PagedResponse.from(page, tagMapper::toDto);
     }
 
     @Override
     @Transactional(readOnly = true)
     public PagedResponse<TagDto> getTagsByEvent(UUID eventId, Pageable pageable) {
-        Page<Tag> tagPage = tagRepository.findAllByEventsId(eventId, pageable);
-        if (tagPage.isEmpty()) {
-            log.error("Не найдены теги для события с id={}", eventId);
-            throw new NotFoundException("Не найдены теги для события с id=" + eventId);
-        }
+        eventReadService.findById(eventId);
+        Page<Tag> page = tagRepository.findAllByEventsId(eventId, pageable);
+        PageValidator.validatePage(page);
 
         log.info("Запрошены теги для события с id={}: страница {}, размер {}",
                 eventId, pageable.getPageNumber(), pageable.getPageSize());
-        return PagedResponse.from(tagPage, tagMapper::toDto);
+        return PagedResponse.from(page, tagMapper::toDto);
     }
 
     @Override
     @Transactional(readOnly = true)
     public TagDto getTagByEvent(UUID eventId, UUID tagId) {
-        Tag tag = tagReader.findByIdAndEventsId(tagId, eventId);
+        eventReadService.findById(eventId);
+        Tag tag = tagReadService.findByIdAndEventsId(tagId, eventId);
         log.info("Запрошен тег с id={} для события с id={}", tagId, eventId);
         return tagMapper.toDto(tag);
     }
 
     @Override
     @Transactional
-    public TagDto updateForEvent(UUID eventId, UUID tagId, TagUpdateDto dto) {
-        Tag tag = tagReader.findByIdAndEventsId(tagId, eventId);
-        tagMapper.updateTagFromDto(dto, tag);
-
-        try {
-            tag = tagRepository.save(tag);
-        } catch (DataIntegrityViolationException exception) {
-            log.error(exception.getMessage(), exception);
-            throw new ConflictException("Тег с именем '" + dto.name() + "' уже существует.");
+    public TagDto updateTag(UUID tagId, TagUpdateDto dto) {
+        Tag tag = tagReadService.findById(tagId);
+        if (dto.name() != null && !dto.name().equals(tag.getName())) {
+            tagReadService.checkExistsByName(dto.name());
         }
 
-        log.info("Обновлен тег с id={} для события с id={}", tagId, eventId);
+        tag = tagMapper.updateTagFromDto(dto, tag);
+
+        tag = tagRepository.save(tag);
+        log.info("Обновлен тег с id={}", tagId);
         return tagMapper.toDto(tag);
     }
 
     @Override
     @Transactional
     public void deleteForEvent(UUID eventId, UUID tagId) {
-        Tag tag = tagReader.findByIdAndEventsId(tagId, eventId);
-        tagRepository.delete(tag);
-        log.info("Удален тег с id={} для события с id={}", tagId, eventId);
+        Event event = eventReadService.findById(eventId);
+        Tag tag = tagReadService.findByIdAndEventsId(tagId, eventId);
+
+        event.removeTag(tag);
+        log.info("Тег с id={} отвязан от события с id={}", tagId, eventId);
+    }
+
+    @Override
+    @Transactional
+    public void deleteTag(UUID tagId) {
+        Tag tag = tagReadService.findById(tagId);
+
+        Iterator<Event> iterator = tag.getEvents().iterator();
+        while (iterator.hasNext()) {
+            Event event = iterator.next();
+            iterator.remove();
+            event.getTags().remove(tag);
+        }
+
+        tagRepository.deleteById(tagId);
+        log.info("Удален тег с id={}", tagId);
     }
 }

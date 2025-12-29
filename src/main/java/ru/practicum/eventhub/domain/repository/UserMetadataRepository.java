@@ -1,5 +1,6 @@
 package ru.practicum.eventhub.domain.repository;
 
+import lombok.NonNull;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;
@@ -13,7 +14,10 @@ public interface UserMetadataRepository extends JpaRepository<UserMetadata, UUID
 
     @Override
     @EntityGraph(attributePaths = "user")
-    Page<UserMetadata> findAll(Pageable pageable);
+    @NonNull
+    Page<UserMetadata> findAll(@NonNull Pageable pageable);
 
     Optional<UserMetadata> findByUserId(UUID userId);
+
+    boolean existsByPhone(String phone);
 }

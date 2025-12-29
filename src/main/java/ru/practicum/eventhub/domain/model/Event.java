@@ -8,7 +8,9 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.OffsetDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 
 @Entity
 @Table(name = "events")
@@ -21,7 +23,7 @@ public class Event {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @Column(nullable = false)
+    @Column(length = 100, nullable = false)
     private String title;
 
     private String description;
@@ -39,23 +41,6 @@ public class Event {
     )
     private List<Tag> tags = new ArrayList<>();
 
-    public void addTag(Tag tag) {
-        tags.add(tag);
-        tag.getEvents().add(this);
-    }
-
-    public void setTags(Set<Tag> newTags) {
-        Iterator<Tag> it = tags.iterator();
-        while (it.hasNext()) {
-            Tag old = it.next();
-            it.remove();
-            old.getEvents().remove(this);
-        }
-        for (Tag tag : newTags) {
-            addTag(tag);
-        }
-    }
-
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
     private OffsetDateTime createdAt;
@@ -63,4 +48,14 @@ public class Event {
     @UpdateTimestamp
     @Column(name = "updated_at")
     private OffsetDateTime updatedAt;
+
+    public void addTag(Tag tag) {
+        tags.add(tag);
+        tag.getEvents().add(this);
+    }
+
+    public void removeTag(Tag tag) {
+        tags.remove(tag);
+        tag.getEvents().remove(this);
+    }
 }
