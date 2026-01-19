@@ -1203,7 +1203,7 @@ components:
     # ----- Requests -----
     UserCreateDto:
       type: object
-      required: [ username, metadata ]
+      required: [ username, email, metadata ]
       properties:
         username:
           type: string
@@ -1238,7 +1238,7 @@ components:
 
     UserMetadataCreateDto:
       type: object
-      required: [ firstName, lastName ]
+      required: [ firstName, lastName, phone ]
       properties:
         firstName:
           type: string
@@ -1331,7 +1331,7 @@ components:
 
     ProjectCreateDto:
       type: object
-      required: [ name, ownerId ]
+      required: [ name ]
       properties:
         name:
           type: string
@@ -1344,11 +1344,6 @@ components:
           maxLength: 255
           description: Описание проекта
           example: "Платформа для организации событий."
-        ownerId:
-          type: string
-          format: uuid
-          description: Идентификатор владельца
-          example: "a1234567-89ab-cdef-0123-456789abcdef"
 
     ProjectUpdateDto:
       type: object
@@ -1364,11 +1359,6 @@ components:
           maxLength: 255
           description: Новое описание проекта
           example: "Расширенная платформа для мероприятий."
-        ownerId:
-          type: string
-          format: uuid
-          description: Новый идентификатор владельца
-          example: "a1234567-89ab-cdef-0123-456789abcdef"
 
     EventCreateDto:
       type: object
@@ -1606,10 +1596,18 @@ components:
           type: string
           description: Описание проекта
           example: "Платформа для организации событий."
+        createdAt:
+          type: string
+          format: date-time
+          description: Дата создания проекта
+          example: "2025-12-01T10:00:00+03:00"
+        updatedAt:
+          type: string
+          format: date-time
+          description: Дата обновления проекта
+          example: "2025-12-02T12:00:00+03:00"
         category:
           $ref: '#/components/schemas/CategoryShortDto'
-        owner:
-          $ref: '#/components/schemas/UserShortDto'
 
     ProjectShortDto:
       type: object

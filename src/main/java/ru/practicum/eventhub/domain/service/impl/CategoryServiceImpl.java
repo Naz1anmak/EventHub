@@ -8,20 +8,15 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.eventhub.api.dto.request.CategoryCreateDto;
 import ru.practicum.eventhub.api.dto.request.CategoryUpdateDto;
-import ru.practicum.eventhub.api.dto.request.ProjectCreateDto;
 import ru.practicum.eventhub.api.dto.response.CategoryDto;
 import ru.practicum.eventhub.api.mapper.CategoryMapper;
 import ru.practicum.eventhub.domain.dto.PagedResponse;
 import ru.practicum.eventhub.domain.model.Category;
-import ru.practicum.eventhub.domain.model.User;
 import ru.practicum.eventhub.domain.repository.CategoryRepository;
 import ru.practicum.eventhub.domain.service.CategoryService;
 import ru.practicum.eventhub.domain.util.PageValidator;
 
-import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -30,7 +25,6 @@ public class CategoryServiceImpl implements CategoryService {
     private final CategoryRepository categoryRepository;
     private final CategoryMapper categoryMapper;
     private final CategoryReadService categoryReadService;
-    private final UserReadService userReadService;
     private final ProjectReadService projectReadService;
 
     @Override
@@ -41,9 +35,7 @@ public class CategoryServiceImpl implements CategoryService {
                 projectReadService.checkExistsByName(projectDto.name())
         );
 
-        Map<UUID, User> owners = getUserMap(dto.projects());
-
-        Category category = categoryMapper.fromCreateDto(dto, owners);
+        Category category = categoryMapper.fromCreateDto(dto);
 
         category = categoryRepository.save(category);
         log.info("Создана категория с id={}", category.getId());
@@ -80,9 +72,7 @@ public class CategoryServiceImpl implements CategoryService {
                 projectReadService.checkExistsByName(projectDto.name())
         );
 
-        Map<UUID, User> owners = getUserMap(dto.projects());
-
-        category = categoryMapper.updateCategoryFromDto(dto, category, owners);
+        category = categoryMapper.updateCategoryFromDto(dto, category);
 
         category = categoryRepository.save(category);
         log.info("Обновлена категория c id={}", id);
@@ -95,12 +85,5 @@ public class CategoryServiceImpl implements CategoryService {
         categoryReadService.findById(id);
         categoryRepository.deleteById(id);
         log.info("Удалена категория с id={}", id);
-    }
-
-    private Map<UUID, User> getUserMap(Set<ProjectCreateDto> dto) {
-        return userReadService.getUsersByIds(dto.stream()
-                .map(ProjectCreateDto::ownerId)
-                .collect(Collectors.toSet())
-        );
     }
 }

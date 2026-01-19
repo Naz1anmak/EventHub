@@ -10,8 +10,8 @@ public final class PageValidator {
     }
 
     public static void validatePage(Page<?> page) {
-        int requested = page.getNumber();
-        int totalPages = page.getTotalPages();
+        Integer requested = page.getNumber();
+        Integer totalPages = page.getTotalPages();
 
         if (totalPages == 0 && requested > 0
                 || totalPages > 0 && requested >= totalPages) {

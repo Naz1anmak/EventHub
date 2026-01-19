@@ -13,11 +13,11 @@ import java.util.UUID;
 
 @Slf4j
 @Service
-@Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class MetadataReadService {
     private final UserMetadataRepository userMetadataRepository;
 
+    @Transactional(readOnly = true)
     public UserMetadata findByUserId(UUID userId) {
         return userMetadataRepository.findByUserId(userId).orElseThrow(() -> {
             log.error("User-metadata для user с id={} не найдена", userId);
@@ -25,6 +25,7 @@ public class MetadataReadService {
         });
     }
 
+    @Transactional(readOnly = true)
     public void checkExistsByPhone(String phone) {
         if (userMetadataRepository.existsByPhone(phone)) {
             log.error("User-metadata с номером телефона='{}' уже существует", phone);

@@ -12,7 +12,6 @@ import ru.practicum.eventhub.api.mapper.ProjectMapper;
 import ru.practicum.eventhub.domain.dto.PagedResponse;
 import ru.practicum.eventhub.domain.model.Category;
 import ru.practicum.eventhub.domain.model.Project;
-import ru.practicum.eventhub.domain.model.User;
 import ru.practicum.eventhub.domain.repository.ProjectRepository;
 import ru.practicum.eventhub.domain.service.ProjectService;
 import ru.practicum.eventhub.domain.util.PageValidator;
@@ -25,7 +24,6 @@ import java.util.UUID;
 public class ProjectServiceImpl implements ProjectService {
     private final ProjectRepository projectRepository;
     private final ProjectMapper projectMapper;
-    private final UserReadService userReadService;
     private final ProjectReadService projectReadService;
     private final CategoryReadService categoryReadService;
 
@@ -60,12 +58,7 @@ public class ProjectServiceImpl implements ProjectService {
             projectReadService.checkExistsByName(dto.name());
         }
 
-        User owner = null;
-        if (dto.ownerId() != null) {
-            owner = userReadService.findById(dto.ownerId());
-        }
-
-        project = projectMapper.updateProjectFromDto(dto, project, owner);
+        project = projectMapper.updateProjectFromDto(dto, project);
         project = projectRepository.save(project);
 
         log.info("Обновлен проект с id={}", projectId);

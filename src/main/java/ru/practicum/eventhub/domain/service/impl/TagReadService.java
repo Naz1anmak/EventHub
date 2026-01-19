@@ -13,11 +13,11 @@ import java.util.UUID;
 
 @Slf4j
 @Service
-@Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class TagReadService {
     private final TagRepository tagRepository;
 
+    @Transactional(readOnly = true)
     public Tag findById(UUID tagId) {
         return tagRepository.findById(tagId).orElseThrow(() -> {
             log.error("Тег с id={} не найден", tagId);
@@ -25,6 +25,7 @@ public class TagReadService {
         });
     }
 
+    @Transactional(readOnly = true)
     public Tag findByIdAndEventsId(UUID tagId, UUID eventId) {
         return tagRepository.findByIdAndEventsId(tagId, eventId).orElseThrow(() -> {
             log.error("Тег с id={} для события с id={} не найден", tagId, eventId);
@@ -32,6 +33,7 @@ public class TagReadService {
         });
     }
 
+    @Transactional(readOnly = true)
     public void checkExistsByName(String name) {
         if (tagRepository.existsByName(name)) {
             log.error("Тег с именем '{}' уже существует", name);
@@ -39,6 +41,7 @@ public class TagReadService {
         }
     }
 
+    @Transactional(readOnly = true)
     public boolean existsByIdAndEventsId(UUID tagId, UUID eventId) {
         return tagRepository.existsByIdAndEventsId(tagId, eventId);
     }

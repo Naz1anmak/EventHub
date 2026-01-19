@@ -31,12 +31,8 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public UserDto createUser(UserCreateDto dto) {
         userReadService.checkExistsByUsername(dto.username());
-        if (dto.email() != null) {
-            userReadService.checkExistsByEmail(dto.email());
-        }
-        if (dto.metadata().phone() != null) {
-            metadataReadService.checkExistsByPhone(dto.metadata().phone());
-        }
+        userReadService.checkExistsByEmail(dto.email());
+        metadataReadService.checkExistsByPhone(dto.metadata().phone());
 
         User user = userMapper.fromCreateDto(dto);
         user.getMetadata().setUser(user);

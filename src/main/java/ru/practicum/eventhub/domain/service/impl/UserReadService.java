@@ -9,16 +9,15 @@ import ru.practicum.eventhub.api.exception.ConflictException;
 import ru.practicum.eventhub.domain.model.User;
 import ru.practicum.eventhub.domain.repository.UserRepository;
 
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.UUID;
 
 @Slf4j
 @Service
-@Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class UserReadService {
     private final UserRepository userRepository;
 
+    @Transactional(readOnly = true)
     public User findById(UUID id) {
         return userRepository.findById(id).orElseThrow(() -> {
             log.error("Пользователь с id={} не найден", id);
@@ -26,24 +25,7 @@ public class UserReadService {
         });
     }
 
-    public Map<UUID, User> getUsersByIds(Set<UUID> ids) {
-        if (ids == null || ids.isEmpty()) {
-            log.info("Список id пользователей пустой, возвращается пустая мапа");
-            return Map.of();
-        }
-
-        List<User> users = new ArrayList<>(userRepository.findAllById(ids));
-        if (users.size() != ids.size()) {
-            List<UUID> foundIds = users.stream().map(User::getId).toList();
-            List<UUID> missing = new ArrayList<>(ids);
-            missing.removeAll(foundIds);
-            log.error("Не найдены пользователи c id={}", missing);
-            throw new EntityNotFoundException("Не найдены пользователи c id=" + missing);
-        }
-
-        return users.stream().collect(Collectors.toMap(User::getId, user -> user));
-    }
-
+    @Transactional(readOnly = true)
     public void checkExistsByUsername(String username) {
         if (userRepository.existsByUsername(username)) {
             log.error("Пользователь с именем '{}' уже существует", username);
@@ -51,6 +33,7 @@ public class UserReadService {
         }
     }
 
+    @Transactional(readOnly = true)
     public void checkExistsByEmail(String email) {
         if (userRepository.existsByEmail(email)) {
             log.error("Пользователь с email '{}' уже существует", email);

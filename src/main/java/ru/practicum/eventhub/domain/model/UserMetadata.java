@@ -33,7 +33,7 @@ public class UserMetadata {
 
     private String address;
 
-    @Column(length = 16, unique = true)
+    @Column(length = 16, nullable = false, unique = true)
     private String phone;
 
     @CreationTimestamp

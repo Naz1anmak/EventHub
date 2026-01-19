@@ -3,7 +3,7 @@ create extension if not exists "pgcrypto";
 create table if not exists users (
   id uuid primary key default gen_random_uuid(),
   username varchar(50) not null unique,
-  email text unique,
+  email text not null unique,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
     constraint chk_users_username_length check (char_length(username) between 3 and 50)
@@ -17,7 +17,7 @@ create table if not exists user_metadata (
   first_name varchar(30) not null,
   last_name varchar(30) not null,
   address text,
-  phone varchar(16) unique,
+  phone varchar(16) not null unique,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
     constraint chk_user_metadata_first_name_length check (char_length(first_name) between 2 and 30),
@@ -42,7 +42,6 @@ create table if not exists projects (
   name varchar(100) not null unique,
   description varchar(255),
   category_id uuid not null references categories(id) on delete restrict,
-  owner_id uuid not null references users(id),
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
     constraint chk_projects_name_length check (char_length(name) between 3 and 100),

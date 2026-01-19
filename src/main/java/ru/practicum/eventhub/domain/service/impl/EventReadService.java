@@ -12,11 +12,11 @@ import java.util.UUID;
 
 @Slf4j
 @Service
-@Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class EventReadService {
     private final EventRepository eventRepository;
 
+    @Transactional(readOnly = true)
     public Event findById(UUID id) {
         return eventRepository.findById(id).orElseThrow(() -> {
             log.error("Событие с id={} не найдено", id);

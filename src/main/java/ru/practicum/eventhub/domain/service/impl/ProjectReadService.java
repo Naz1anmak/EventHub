@@ -13,11 +13,11 @@ import java.util.UUID;
 
 @Slf4j
 @Service
-@Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class ProjectReadService {
     private final ProjectRepository projectRepository;
 
+    @Transactional(readOnly = true)
     public Project findByIdAndCategoryId(UUID projectId, UUID categoryId) {
         return projectRepository.findByIdAndCategoryId(projectId, categoryId).orElseThrow(() -> {
             log.error("Проект с id={} в категории с id={} не найден", projectId, categoryId);
@@ -25,6 +25,7 @@ public class ProjectReadService {
         });
     }
 
+    @Transactional(readOnly = true)
     public void checkExistsByName(String name) {
         if (projectRepository.existsByName(name)) {
             log.error("Проект с именем='{}' уже существует", name);

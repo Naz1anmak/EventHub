@@ -11,6 +11,7 @@ public record UserCreateDto(
         @Size(min = 3, max = 50, message = "Username должен быть от 3 до 50 символов")
         String username,
 
+        @NotBlank(message = "Email не должен быть пустым")
         @Email(message = "Email должен быть корректным")
         String email,
 

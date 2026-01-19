@@ -13,11 +13,11 @@ import java.util.UUID;
 
 @Slf4j
 @Service
-@Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class CategoryReadService {
     private final CategoryRepository categoryRepository;
 
+    @Transactional(readOnly = true)
     public Category findById(UUID id) {
         return categoryRepository.findById(id).orElseThrow(() -> {
             log.error("Категория с id={} не найдена", id);
@@ -25,6 +25,7 @@ public class CategoryReadService {
         });
     }
 
+    @Transactional(readOnly = true)
     public void checkExistsByName(String name) {
         if (categoryRepository.existsByName(name)) {
             log.error("Категория с именем='{}' уже существует", name);

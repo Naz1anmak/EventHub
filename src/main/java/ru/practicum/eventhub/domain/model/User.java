@@ -25,7 +25,7 @@ public class User {
     @Column(length = 50, nullable = false, unique = true)
     private String username;
 
-    @Column(unique = true)
+    @Column(nullable = false, unique = true)
     private String email;
 
     @CreationTimestamp

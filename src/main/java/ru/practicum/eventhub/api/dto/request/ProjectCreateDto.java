@@ -1,10 +1,7 @@
 package ru.practicum.eventhub.api.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
-
-import java.util.UUID;
 
 public record ProjectCreateDto(
 
@@ -13,9 +10,6 @@ public record ProjectCreateDto(
         String name,
 
         @Size(max = 255, message = "Описание должно быть до 255 символов")
-        String description,
-
-        @NotNull(message = "Поле ownerId не должно быть null")
-        UUID ownerId
+        String description
 ) {
 }

@@ -15,6 +15,7 @@ public record UserMetadataCreateDto(
 
         String address,
 
+        @NotBlank(message = "Номер телефона не должен быть пустым")
         @Size(max = 16, message = "Номер телефона должен быть до 16 символов")
         String phone
 ) {

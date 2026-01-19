@@ -7,7 +7,6 @@ import org.mapstruct.MappingTarget;
 import ru.practicum.eventhub.api.dto.request.ProjectUpdateDto;
 import ru.practicum.eventhub.api.dto.response.ProjectDto;
 import ru.practicum.eventhub.domain.model.Project;
-import ru.practicum.eventhub.domain.model.User;
 
 import static org.mapstruct.MappingConstants.ComponentModel.SPRING;
 import static org.mapstruct.NullValuePropertyMappingStrategy.IGNORE;
@@ -23,6 +22,5 @@ public interface ProjectMapper {
     @Mapping(target = "updatedAt", ignore = true)
     @Mapping(target = "name", source = "updateDto.name")
     @Mapping(target = "description", source = "updateDto.description")
-    @Mapping(target = "owner", source = "owner")
-    Project updateProjectFromDto(ProjectUpdateDto updateDto, @MappingTarget Project project, User owner);
+    Project updateProjectFromDto(ProjectUpdateDto updateDto, @MappingTarget Project project);
 }
