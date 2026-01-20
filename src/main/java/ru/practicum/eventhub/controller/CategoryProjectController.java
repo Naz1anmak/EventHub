@@ -6,9 +6,15 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 import ru.practicum.eventhub.api.CategoriesApi;
-import ru.practicum.eventhub.api.mapper.CategoryApiMapper;
-import ru.practicum.eventhub.api.mapper.ProjectApiMapper;
-import ru.practicum.eventhub.api.model.*;
+import ru.practicum.eventhub.api.dto.request.CategoryCreateDto;
+import ru.practicum.eventhub.api.dto.request.CategoryUpdateDto;
+import ru.practicum.eventhub.api.dto.request.ProjectUpdateDto;
+import ru.practicum.eventhub.api.dto.response.CategoryDto;
+import ru.practicum.eventhub.api.dto.response.ProjectDto;
+import ru.practicum.eventhub.api.model.PageOfCategories;
+import ru.practicum.eventhub.api.model.PageOfProjects;
+import ru.practicum.eventhub.application.CategoryApplicationService;
+import ru.practicum.eventhub.application.ProjectApplicationService;
 import ru.practicum.eventhub.domain.service.CategoryService;
 import ru.practicum.eventhub.domain.service.ProjectService;
 
@@ -17,20 +23,17 @@ import java.util.UUID;
 @RestController
 @RequiredArgsConstructor
 public class CategoryProjectController implements CategoriesApi {
+    private final CategoryApplicationService categoryApplicationService;
+    private final ProjectApplicationService projectApplicationService;
     private final CategoryService categoryService;
     private final ProjectService projectService;
-    private final CategoryApiMapper categoryApiMapper;
-    private final ProjectApiMapper projectApiMapper;
 
     @Override
     public ResponseEntity<CategoryDto> createCategory(CategoryCreateDto categoryCreateDto) {
-        var serviceCreateDto = categoryApiMapper.toServiceDto(categoryCreateDto);
-        var serviceResult = categoryService.createCategory(serviceCreateDto);
-        var apiResult = categoryApiMapper.toApiDto(serviceResult);
-
+        CategoryDto categoryDto = categoryService.createCategory(categoryCreateDto);
         return ResponseEntity
                 .status(HttpStatus.CREATED)
-                .body(apiResult);
+                .body(categoryDto);
     }
 
     @Override
@@ -50,44 +53,38 @@ public class CategoryProjectController implements CategoriesApi {
     }
 
     @Override
-    public ResponseEntity<PagedCategoryDtoResponse> getCategories(Integer page, Integer size) {
-        var servicePage = categoryService.getCategories(PageRequest.of(page, size));
-        return ResponseEntity.ok(categoryApiMapper.toApiPage(servicePage));
+    public ResponseEntity<PageOfCategories> getCategories(Integer page, Integer size) {
+        PageOfCategories pageOfCategories = categoryApplicationService.getCategories(PageRequest.of(page, size));
+        return ResponseEntity.ok(pageOfCategories);
     }
 
     @Override
     public ResponseEntity<CategoryDto> getCategoryById(UUID categoryId) {
-        var servicePage = categoryService.getCategoryById(categoryId);
-        return ResponseEntity.ok(categoryApiMapper.toApiDto(servicePage));
+        CategoryDto categoryDto = categoryService.getCategoryById(categoryId);
+        return ResponseEntity.ok(categoryDto);
     }
 
     @Override
     public ResponseEntity<ProjectDto> getProjectByCategoryId(UUID categoryId, UUID projectId) {
-        var serviceDto = projectService.getProjectByCategory(categoryId, projectId);
-        return ResponseEntity.ok(projectApiMapper.toApiDto(serviceDto));
+        ProjectDto projectDto = projectService.getProjectByCategory(categoryId, projectId);
+        return ResponseEntity.ok(projectDto);
     }
 
     @Override
-    public ResponseEntity<PagedProjectDtoResponse> getProjectsByCategoryId(UUID categoryId, Integer page, Integer size) {
-        var servicePage = projectService.getProjectsByCategory(categoryId, PageRequest.of(page, size));
-        return ResponseEntity.ok(projectApiMapper.toApiPage(servicePage));
+    public ResponseEntity<PageOfProjects> getProjectsByCategoryId(UUID categoryId, Integer page, Integer size) {
+        PageOfProjects pageOfProjects = projectApplicationService.getProjectsByCategory(categoryId, PageRequest.of(page, size));
+        return ResponseEntity.ok(pageOfProjects);
     }
 
     @Override
     public ResponseEntity<CategoryDto> updateCategory(UUID categoryId, CategoryUpdateDto categoryUpdateDto) {
-        var serviceUpdateDto = categoryApiMapper.toServiceDto(categoryUpdateDto);
-        var serviceResult = categoryService.updateCategory(categoryId, serviceUpdateDto);
-        var apiResult = categoryApiMapper.toApiDto(serviceResult);
-
-        return ResponseEntity.ok(apiResult);
+        CategoryDto categoryDto = categoryService.updateCategory(categoryId, categoryUpdateDto);
+        return ResponseEntity.ok(categoryDto);
     }
 
     @Override
     public ResponseEntity<ProjectDto> updateProjectForCategory(UUID categoryId, UUID projectId, ProjectUpdateDto projectUpdateDto) {
-        var serviceUpdateDto = projectApiMapper.toServiceDto(projectUpdateDto);
-        var serviceResult = projectService.updateForCategory(categoryId, projectId, serviceUpdateDto);
-        var apiResult = projectApiMapper.toApiDto(serviceResult);
-
-        return ResponseEntity.ok(apiResult);
+        ProjectDto projectDto = projectService.updateForCategory(categoryId, projectId, projectUpdateDto);
+        return ResponseEntity.ok(projectDto);
     }
 }

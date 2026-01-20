@@ -6,9 +6,14 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 import ru.practicum.eventhub.api.UsersApi;
-import ru.practicum.eventhub.api.mapper.UserApiMapper;
-import ru.practicum.eventhub.api.mapper.UserMetadataApiMapper;
-import ru.practicum.eventhub.api.model.*;
+import ru.practicum.eventhub.api.dto.request.UserCreateDto;
+import ru.practicum.eventhub.api.dto.request.UserUpdateDto;
+import ru.practicum.eventhub.api.dto.response.UserDto;
+import ru.practicum.eventhub.api.dto.response.UserMetadataDto;
+import ru.practicum.eventhub.api.model.PageOfMetadata;
+import ru.practicum.eventhub.api.model.PageOfUsers;
+import ru.practicum.eventhub.application.MetadataApplicationService;
+import ru.practicum.eventhub.application.UserApplicationService;
 import ru.practicum.eventhub.domain.service.UserMetadataService;
 import ru.practicum.eventhub.domain.service.UserService;
 
@@ -17,20 +22,17 @@ import java.util.UUID;
 @RestController
 @RequiredArgsConstructor
 public class UserController implements UsersApi {
+    private final UserApplicationService userApplicationService;
+    private final MetadataApplicationService metadataApplicationService;
     private final UserService userService;
     private final UserMetadataService userMetadataService;
-    private final UserApiMapper userApiMapper;
-    private final UserMetadataApiMapper userMetadataApiMapper;
 
     @Override
     public ResponseEntity<UserDto> createUser(UserCreateDto userCreateDto) {
-        var serviceCreateDto = userApiMapper.toServiceDto(userCreateDto);
-        var serviceResult = userService.createUser(serviceCreateDto);
-        var apiResult = userApiMapper.toApiDto(serviceResult);
-
+        UserDto userDto = userService.createUser(userCreateDto);
         return ResponseEntity
                 .status(HttpStatus.CREATED)
-                .body(apiResult);
+                .body(userDto);
     }
 
     @Override
@@ -43,34 +45,31 @@ public class UserController implements UsersApi {
 
     @Override
     public ResponseEntity<UserDto> getUserById(UUID userId) {
-        var serviceDto = userService.getUserById(userId);
-        return ResponseEntity.ok(userApiMapper.toApiDto(serviceDto));
+        UserDto userDto = userService.getUserById(userId);
+        return ResponseEntity.ok(userDto);
     }
 
     @Override
-    public ResponseEntity<PagedUserMetadataDtoResponse> getUserMetadata(Integer page, Integer size) {
-        var servicePage = userMetadataService.getUserMetadata(PageRequest.of(page, size));
-        return ResponseEntity.ok(userMetadataApiMapper.toApiPage(servicePage));
+    public ResponseEntity<PageOfMetadata> getUserMetadata(Integer page, Integer size) {
+        PageOfMetadata pageOfUsers = metadataApplicationService.getUserMetadata(PageRequest.of(page, size));
+        return ResponseEntity.ok(pageOfUsers);
     }
 
     @Override
     public ResponseEntity<UserMetadataDto> getUserMetadataById(UUID userId) {
-        var serviceDto = userMetadataService.getByUserId(userId);
-        return ResponseEntity.ok(userMetadataApiMapper.toApiDto(serviceDto));
+        UserMetadataDto metadataDto = userMetadataService.getByUserId(userId);
+        return ResponseEntity.ok(metadataDto);
     }
 
     @Override
-    public ResponseEntity<PagedUserDtoResponse> getUsers(Integer page, Integer size) {
-        var servicePage = userService.getUsers(PageRequest.of(page, size));
-        return ResponseEntity.ok(userApiMapper.toApiPage(servicePage));
+    public ResponseEntity<PageOfUsers> getUsers(Integer page, Integer size) {
+        PageOfUsers pageOfUsers = userApplicationService.getUsers(PageRequest.of(page, size));
+        return ResponseEntity.ok(pageOfUsers);
     }
 
     @Override
     public ResponseEntity<UserDto> updateUser(UUID userId, UserUpdateDto userUpdateDto) {
-        var serviceUpdateDto = userApiMapper.toServiceDto(userUpdateDto);
-        var serviceResult = userService.updateUser(userId, serviceUpdateDto);
-        var apiResult = userApiMapper.toApiDto(serviceResult);
-
-        return ResponseEntity.ok(apiResult);
+        UserDto userDto = userService.updateUser(userId, userUpdateDto);
+        return ResponseEntity.ok(userDto);
     }
 }

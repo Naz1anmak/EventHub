@@ -9,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.eventhub.api.dto.request.UserCreateDto;
 import ru.practicum.eventhub.api.dto.request.UserUpdateDto;
 import ru.practicum.eventhub.api.dto.response.UserDto;
+import ru.practicum.eventhub.api.exception.ConflictException;
 import ru.practicum.eventhub.api.mapper.UserMapper;
 import ru.practicum.eventhub.domain.dto.PagedResponse;
 import ru.practicum.eventhub.domain.model.User;
@@ -65,15 +66,10 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public UserDto updateUser(UUID id, UserUpdateDto dto) {
         User user = userReadService.findById(id);
-        if (dto.username() != null && !dto.username().equals(user.getUsername())) {
-            userReadService.checkExistsByUsername(dto.username());
-        }
-        if (dto.email() != null && !dto.email().equals(user.getEmail())) {
-            userReadService.checkExistsByEmail(dto.email());
-        }
-        if (dto.metadata() != null && dto.metadata().phone() != null) {
-            metadataReadService.checkExistsByPhone(dto.metadata().phone());
-        }
+
+        validateUsernameUpdate(dto.username(), user.getUsername());
+        validateEmailUpdate(dto.email(), user.getEmail());
+        validatePhoneUpdate(dto.metadata() != null ? dto.metadata().phone() : null, user.getMetadata().getPhone());
 
         user = userMapper.updateUserFromDto(dto, user);
 
@@ -88,5 +84,32 @@ public class UserServiceImpl implements UserService {
         userReadService.findById(id);
         userRepository.deleteById(id);
         log.info("Удален пользователь с id={}", id);
+    }
+
+    private void validateUsernameUpdate(String newUsername, String currentUsername) {
+        if (newUsername == null) return;
+        if (newUsername.equals(currentUsername)) {
+            log.error("Новое имя пользователя совпадает с текущим");
+            throw new ConflictException("Новое имя пользователя совпадает с текущим");
+        }
+        userReadService.checkExistsByUsername(newUsername);
+    }
+
+    private void validateEmailUpdate(String newEmail, String currentEmail) {
+        if (newEmail == null) return;
+        if (newEmail.equals(currentEmail)) {
+            log.error("Новый email совпадает с текущим");
+            throw new ConflictException("Новый email совпадает с текущим");
+        }
+        userReadService.checkExistsByEmail(newEmail);
+    }
+
+    private void validatePhoneUpdate(String newPhone, String currentPhone) {
+        if (newPhone == null) return;
+        if (newPhone.equals(currentPhone)) {
+            log.error("Новый номер телефона совпадает с текущим");
+            throw new ConflictException("Новый номер телефона совпадает с текущим");
+        }
+        metadataReadService.checkExistsByPhone(newPhone);
     }
 }
