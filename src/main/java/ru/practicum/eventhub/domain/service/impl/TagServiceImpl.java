@@ -17,6 +17,7 @@ import ru.practicum.eventhub.domain.model.Tag;
 import ru.practicum.eventhub.domain.repository.TagRepository;
 import ru.practicum.eventhub.domain.service.TagService;
 import ru.practicum.eventhub.domain.util.PageValidator;
+import ru.practicum.eventhub.domain.validation.TagValidationService;
 
 import java.util.Iterator;
 import java.util.UUID;
@@ -29,6 +30,7 @@ public class TagServiceImpl implements TagService {
     private final TagMapper tagMapper;
     private final TagReadService tagReadService;
     private final EventReadService eventReadService;
+    private final TagValidationService tagValidationService;
 
     @Override
     @Transactional
@@ -92,9 +94,8 @@ public class TagServiceImpl implements TagService {
     @Transactional
     public TagDto updateTag(UUID tagId, TagUpdateDto dto) {
         Tag tag = tagReadService.findById(tagId);
-        if (dto.name() != null && !dto.name().equals(tag.getName())) {
-            tagReadService.checkExistsByName(dto.name());
-        }
+
+        tagValidationService.validateUpdate(dto, tag);
 
         tag = tagMapper.updateTagFromDto(dto, tag);
 

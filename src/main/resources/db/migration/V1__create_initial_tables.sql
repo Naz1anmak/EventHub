@@ -2,6 +2,7 @@ create extension if not exists "pgcrypto";
 
 create table if not exists users (
   id uuid primary key default gen_random_uuid(),
+  version bigint not null,
   username varchar(50) not null unique,
   email text not null unique,
   created_at timestamptz not null default now(),
@@ -28,6 +29,7 @@ create index if not exists idx_user_metadata_phone on user_metadata(phone);
 
 create table if not exists categories (
   id uuid primary key default gen_random_uuid(),
+  version bigint not null,
   name varchar(100) not null unique,
   description varchar(255),
   created_at timestamptz not null default now(),
@@ -39,6 +41,7 @@ create index if not exists idx_categories_name on categories(name);
 
 create table if not exists projects (
   id uuid primary key default gen_random_uuid(),
+  version bigint not null,
   name varchar(100) not null unique,
   description varchar(255),
   category_id uuid not null references categories(id) on delete restrict,
@@ -52,6 +55,7 @@ create index if not exists idx_projects_category_id on projects(category_id);
 
 create table if not exists events (
   id uuid primary key default gen_random_uuid(),
+  version bigint not null,
   title varchar(100) not null,
   description varchar(255),
   event_date timestamptz,
@@ -64,6 +68,7 @@ create table if not exists events (
 
 create table if not exists tags (
   id uuid primary key default gen_random_uuid(),
+  version bigint not null,
   name varchar(50) not null unique,
   description varchar(255),
   created_at timestamptz not null default now(),

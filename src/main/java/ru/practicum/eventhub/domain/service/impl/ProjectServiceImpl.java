@@ -15,6 +15,7 @@ import ru.practicum.eventhub.domain.model.Project;
 import ru.practicum.eventhub.domain.repository.ProjectRepository;
 import ru.practicum.eventhub.domain.service.ProjectService;
 import ru.practicum.eventhub.domain.util.PageValidator;
+import ru.practicum.eventhub.domain.validation.ProjectValidationService;
 
 import java.util.UUID;
 
@@ -26,6 +27,7 @@ public class ProjectServiceImpl implements ProjectService {
     private final ProjectMapper projectMapper;
     private final ProjectReadService projectReadService;
     private final CategoryReadService categoryReadService;
+    private final ProjectValidationService projectValidationService;
 
     @Override
     @Transactional(readOnly = true)
@@ -54,9 +56,7 @@ public class ProjectServiceImpl implements ProjectService {
     public ProjectDto updateForCategory(UUID categoryId, UUID projectId, ProjectUpdateDto dto) {
         categoryReadService.findById(categoryId);
         Project project = projectReadService.findByIdAndCategoryId(projectId, categoryId);
-        if (dto.name() != null && !dto.name().equals(project.getName())) {
-            projectReadService.checkExistsByName(dto.name());
-        }
+        projectValidationService.validateUpdate(dto, project);
 
         project = projectMapper.updateProjectFromDto(dto, project);
         project = projectRepository.save(project);

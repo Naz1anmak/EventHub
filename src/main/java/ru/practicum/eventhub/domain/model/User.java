@@ -22,6 +22,10 @@ public class User {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
+    @Version
+    @JsonIgnore
+    private Long version;
+
     @Column(length = 50, nullable = false, unique = true)
     private String username;
 

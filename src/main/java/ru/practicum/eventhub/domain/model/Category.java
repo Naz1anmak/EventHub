@@ -1,5 +1,6 @@
 package ru.practicum.eventhub.domain.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -22,6 +23,10 @@ public class Category {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
+
+    @Version
+    @JsonIgnore
+    private Long version;
 
     @Column(length = 100, nullable = false, unique = true)
     private String name;

@@ -15,6 +15,7 @@ import ru.practicum.eventhub.domain.model.Category;
 import ru.practicum.eventhub.domain.repository.CategoryRepository;
 import ru.practicum.eventhub.domain.service.CategoryService;
 import ru.practicum.eventhub.domain.util.PageValidator;
+import ru.practicum.eventhub.domain.validation.CategoryValidationService;
 
 import java.util.UUID;
 
@@ -26,6 +27,7 @@ public class CategoryServiceImpl implements CategoryService {
     private final CategoryMapper categoryMapper;
     private final CategoryReadService categoryReadService;
     private final ProjectReadService projectReadService;
+    private final CategoryValidationService categoryValidationService;
 
     @Override
     @Transactional
@@ -65,12 +67,8 @@ public class CategoryServiceImpl implements CategoryService {
     @Transactional
     public CategoryDto updateCategory(UUID id, CategoryUpdateDto dto) {
         Category category = categoryReadService.findById(id);
-        if (dto.name() != null && !dto.name().equals(category.getName())) {
-            categoryReadService.checkExistsByName(dto.name());
-        }
-        dto.projects().forEach(projectDto ->
-                projectReadService.checkExistsByName(projectDto.name())
-        );
+
+        categoryValidationService.validateUpdate(dto, category);
 
         category = categoryMapper.updateCategoryFromDto(dto, category);
 

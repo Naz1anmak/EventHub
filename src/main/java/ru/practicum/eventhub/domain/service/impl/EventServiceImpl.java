@@ -15,6 +15,7 @@ import ru.practicum.eventhub.domain.model.Event;
 import ru.practicum.eventhub.domain.repository.EventRepository;
 import ru.practicum.eventhub.domain.service.EventService;
 import ru.practicum.eventhub.domain.util.PageValidator;
+import ru.practicum.eventhub.domain.validation.EventValidationService;
 
 import java.util.UUID;
 
@@ -26,6 +27,7 @@ public class EventServiceImpl implements EventService {
     private final EventReadService eventReadService;
     private final EventMapper eventMapper;
     private final TagReadService tagReadService;
+    private final EventValidationService eventValidationService;
 
     @Override
     @Transactional
@@ -63,9 +65,8 @@ public class EventServiceImpl implements EventService {
     @Transactional
     public EventDto updateEvent(UUID id, EventUpdateDto dto) {
         Event event = eventReadService.findById(id);
-        dto.tags().forEach(tagDto ->
-                tagReadService.checkExistsByName(tagDto.name())
-        );
+
+        eventValidationService.validateUpdate(dto);
 
         event = eventMapper.updateEventFromDto(dto, event);
 
