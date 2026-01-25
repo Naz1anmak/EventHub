@@ -35,7 +35,7 @@ public class TagServiceImpl implements TagService {
     @Override
     @Transactional
     public TagDto createTag(TagCreateDto dto) {
-        tagReadService.checkExistsByName(dto.name());
+        tagValidationService.validateCreate(dto);
         Tag tag = tagMapper.fromCreateDto(dto);
 
         tag = tagRepository.save(tag);

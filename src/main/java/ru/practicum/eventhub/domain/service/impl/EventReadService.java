@@ -23,4 +23,12 @@ public class EventReadService {
             return new EntityNotFoundException("Событие с id=" + id + " не найдено");
         });
     }
+
+    @Transactional(readOnly = true)
+    public Event findByIdForUpdate(UUID id) {
+        return eventRepository.findByIdForUpdate(id).orElseThrow(() -> {
+            log.error("Событие с id={} не найдено", id);
+            return new EntityNotFoundException("Событие с id=" + id + " не найдено");
+        });
+    }
 }

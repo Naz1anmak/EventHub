@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.practicum.eventhub.api.dto.request.TagCreateDto;
 import ru.practicum.eventhub.api.dto.request.TagUpdateDto;
 import ru.practicum.eventhub.api.exception.ConflictException;
 import ru.practicum.eventhub.domain.model.Tag;
@@ -18,11 +19,17 @@ public class TagValidationService {
     private final TagReadService tagReadService;
 
     @Transactional(propagation = REQUIRES_NEW, readOnly = true)
+    public void validateCreate(TagCreateDto dto) {
+        tagReadService.checkExistsByName(dto.name());
+    }
+
+    @Transactional(propagation = REQUIRES_NEW, readOnly = true)
     public void validateUpdate(TagUpdateDto dto, Tag tag) {
         validateName(dto.name(), tag.getName());
     }
 
-    private void validateName(String newName, String currentName) {
+    @Transactional(readOnly = true)
+    public void validateName(String newName, String currentName) {
         if (newName == null) return;
         if (newName.equals(currentName)) {
             log.error("Новое имя тега совпадает с текущим");

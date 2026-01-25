@@ -26,15 +26,12 @@ public class EventServiceImpl implements EventService {
     private final EventRepository eventRepository;
     private final EventReadService eventReadService;
     private final EventMapper eventMapper;
-    private final TagReadService tagReadService;
     private final EventValidationService eventValidationService;
 
     @Override
     @Transactional
     public EventDto createEvent(EventCreateDto dto) {
-        dto.tags().forEach(tagDto ->
-                tagReadService.checkExistsByName(tagDto.name())
-        );
+        eventValidationService.validateCreate(dto);
 
         Event event = eventMapper.fromCreateDto(dto);
 
@@ -64,7 +61,7 @@ public class EventServiceImpl implements EventService {
     @Override
     @Transactional
     public EventDto updateEvent(UUID id, EventUpdateDto dto) {
-        Event event = eventReadService.findById(id);
+        Event event = eventReadService.findByIdForUpdate(id);
 
         eventValidationService.validateUpdate(dto);
 

@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.practicum.eventhub.api.dto.request.CategoryCreateDto;
 import ru.practicum.eventhub.api.dto.request.CategoryUpdateDto;
 import ru.practicum.eventhub.api.dto.request.ProjectCreateDto;
 import ru.practicum.eventhub.api.exception.ConflictException;
@@ -23,12 +24,19 @@ public class CategoryValidationService {
     private final ProjectReadService projectReadService;
 
     @Transactional(propagation = REQUIRES_NEW, readOnly = true)
+    public void validateCreate(CategoryCreateDto dto) {
+        categoryReadService.checkExistsByName(dto.name());
+        validateProjectName(dto.projects());
+    }
+
+    @Transactional(propagation = REQUIRES_NEW, readOnly = true)
     public void validateUpdate(CategoryUpdateDto dto, Category category) {
         validateName(dto.name(), category.getName());
         validateProjectName(dto.projects());
     }
 
-    private void validateName(String newName, String currentName) {
+    @Transactional(readOnly = true)
+    public void validateName(String newName, String currentName) {
         if (newName == null) return;
         if (newName.equals(currentName)) {
             log.error("Новое имя категории совпадает с текущим");
@@ -37,7 +45,8 @@ public class CategoryValidationService {
         categoryReadService.checkExistsByName(newName);
     }
 
-    private void validateProjectName(Set<ProjectCreateDto> projects) {
+    @Transactional(readOnly = true)
+    public void validateProjectName(Set<ProjectCreateDto> projects) {
         projects.forEach(projectDto ->
                 projectReadService.checkExistsByName(projectDto.name())
         );

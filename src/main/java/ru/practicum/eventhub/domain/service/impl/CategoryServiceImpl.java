@@ -26,16 +26,12 @@ public class CategoryServiceImpl implements CategoryService {
     private final CategoryRepository categoryRepository;
     private final CategoryMapper categoryMapper;
     private final CategoryReadService categoryReadService;
-    private final ProjectReadService projectReadService;
     private final CategoryValidationService categoryValidationService;
 
     @Override
     @Transactional
     public CategoryDto createCategory(CategoryCreateDto dto) {
-        categoryReadService.checkExistsByName(dto.name());
-        dto.projects().forEach(projectDto ->
-                projectReadService.checkExistsByName(projectDto.name())
-        );
+        categoryValidationService.validateCreate(dto);
 
         Category category = categoryMapper.fromCreateDto(dto);
 
@@ -66,7 +62,7 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     @Transactional
     public CategoryDto updateCategory(UUID id, CategoryUpdateDto dto) {
-        Category category = categoryReadService.findById(id);
+        Category category = categoryReadService.findByIdForUpdate(id);
 
         categoryValidationService.validateUpdate(dto, category);
 

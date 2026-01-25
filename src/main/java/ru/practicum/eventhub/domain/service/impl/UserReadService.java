@@ -40,4 +40,12 @@ public class UserReadService {
             throw new ConflictException("Пользователь с email '" + email + "' уже существует");
         }
     }
+
+    @Transactional(readOnly = true)
+    public User findByIdForUpdate(UUID id) {
+        return userRepository.findByIdForUpdate(id).orElseThrow(() -> {
+            log.error("Пользователь с id={} не найден", id);
+            return new EntityNotFoundException("Пользователь с id=" + id + " не найден");
+        });
+    }
 }

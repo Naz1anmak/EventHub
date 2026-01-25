@@ -26,15 +26,12 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final UserMapper userMapper;
     private final UserReadService userReadService;
-    private final MetadataReadService metadataReadService;
     private final UserValidationService userValidationService;
 
     @Override
     @Transactional
     public UserDto createUser(UserCreateDto dto) {
-        userReadService.checkExistsByUsername(dto.username());
-        userReadService.checkExistsByEmail(dto.email());
-        metadataReadService.checkExistsByPhone(dto.metadata().phone());
+        userValidationService.validateCreate(dto);
 
         User user = userMapper.fromCreateDto(dto);
         user.getMetadata().setUser(user);
@@ -66,7 +63,7 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public UserDto updateUser(UUID id, UserUpdateDto dto) {
-        User user = userReadService.findById(id);
+        User user = userReadService.findByIdForUpdate(id);
 
         userValidationService.validateUpdate(dto, user);
 

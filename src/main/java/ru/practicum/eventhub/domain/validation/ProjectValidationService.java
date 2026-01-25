@@ -22,7 +22,8 @@ public class ProjectValidationService {
         validateName(dto.name(), project.getName());
     }
 
-    private void validateName(String newName, String currentName) {
+    @Transactional(readOnly = true)
+    public void validateName(String newName, String currentName) {
         if (newName == null) return;
         if (newName.equals(currentName)) {
             log.error("Новое имя проекта совпадает с текущим");

@@ -32,4 +32,12 @@ public class CategoryReadService {
             throw new ConflictException("Категория с именем='" + name + "' уже существует");
         }
     }
+
+    @Transactional(readOnly = true)
+    public Category findByIdForUpdate(UUID id) {
+        return categoryRepository.findByIdForUpdate(id).orElseThrow(() -> {
+            log.error("Категория с id={} не найдена", id);
+            return new EntityNotFoundException("Категория с id=" + id + " не найдена");
+        });
+    }
 }
