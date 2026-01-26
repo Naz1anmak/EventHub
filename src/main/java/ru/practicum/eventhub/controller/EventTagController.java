@@ -1,0 +1,121 @@
+package ru.practicum.eventhub.controller;
+
+import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.RestController;
+import ru.practicum.eventhub.api.EventsApi;
+import ru.practicum.eventhub.api.dto.request.EventCreateDto;
+import ru.practicum.eventhub.api.dto.request.EventUpdateDto;
+import ru.practicum.eventhub.api.dto.request.TagCreateDto;
+import ru.practicum.eventhub.api.dto.request.TagUpdateDto;
+import ru.practicum.eventhub.api.dto.response.EventDto;
+import ru.practicum.eventhub.api.dto.response.TagDto;
+import ru.practicum.eventhub.api.model.PageOfEvents;
+import ru.practicum.eventhub.api.model.PageOfTags;
+import ru.practicum.eventhub.application.EventApplicationService;
+import ru.practicum.eventhub.application.TagApplicationService;
+import ru.practicum.eventhub.domain.service.EventService;
+import ru.practicum.eventhub.domain.service.TagService;
+
+import java.util.UUID;
+
+@RestController
+@RequiredArgsConstructor
+public class EventTagController implements EventsApi {
+    private final EventApplicationService eventApplicationService;
+    private final TagApplicationService tagApplicationService;
+    private final EventService eventService;
+    private final TagService tagService;
+
+    @Override
+    public ResponseEntity<TagDto> addTagToEvent(UUID eventId, UUID tagId) {
+        TagDto tagDto = tagService.addTagToEvent(eventId, tagId);
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(tagDto);
+    }
+
+    @Override
+    public ResponseEntity<EventDto> createEvent(EventCreateDto eventCreateDto) {
+        EventDto eventDto = eventService.createEvent(eventCreateDto);
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(eventDto);
+    }
+
+    @Override
+    public ResponseEntity<TagDto> createTag(TagCreateDto tagCreateDto) {
+        TagDto tagDto = tagService.createTag(tagCreateDto);
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(tagDto);
+    }
+
+    @Override
+    public ResponseEntity<Void> deleteEvent(UUID eventId) {
+        eventService.deleteEvent(eventId);
+        return ResponseEntity
+                .status(HttpStatus.NO_CONTENT)
+                .build();
+    }
+
+    @Override
+    public ResponseEntity<Void> deleteTag(UUID tagId) {
+        tagService.deleteTag(tagId);
+        return ResponseEntity
+                .status(HttpStatus.NO_CONTENT)
+                .build();
+    }
+
+    @Override
+    public ResponseEntity<Void> deleteTagForEvent(UUID eventId, UUID tagId) {
+        tagService.deleteForEvent(eventId, tagId);
+        return ResponseEntity
+                .status(HttpStatus.NO_CONTENT)
+                .build();
+    }
+
+    @Override
+    public ResponseEntity<EventDto> getEventById(UUID eventId) {
+        EventDto eventDto = eventService.getEventById(eventId);
+        return ResponseEntity.ok(eventDto);
+    }
+
+    @Override
+    public ResponseEntity<PageOfEvents> getEvents(Integer page, Integer size) {
+        PageOfEvents pageOfEvents = eventApplicationService.getEvents(PageRequest.of(page, size));
+        return ResponseEntity.ok(pageOfEvents);
+    }
+
+    @Override
+    public ResponseEntity<TagDto> getTagByEventId(UUID eventId, UUID tagId) {
+        TagDto tagDto = tagService.getTagByEvent(eventId, tagId);
+        return ResponseEntity.ok(tagDto);
+    }
+
+    @Override
+    public ResponseEntity<PageOfTags> getTags(Integer page, Integer size) {
+        PageOfTags pageOfTags = tagApplicationService.getTags(PageRequest.of(page, size));
+        return ResponseEntity.ok(pageOfTags);
+    }
+
+    @Override
+    public ResponseEntity<PageOfTags> getTagsByEventId(UUID eventId, Integer page, Integer size) {
+        PageOfTags pageOfTags = tagApplicationService.getTagsByEvent(eventId, PageRequest.of(page, size));
+        return ResponseEntity.ok(pageOfTags);
+    }
+
+    @Override
+    public ResponseEntity<EventDto> updateEvent(UUID eventId, EventUpdateDto eventUpdateDto) {
+        EventDto eventDto = eventService.updateEvent(eventId, eventUpdateDto);
+        return ResponseEntity.ok(eventDto);
+    }
+
+    @Override
+    public ResponseEntity<TagDto> updateTag(UUID tagId, TagUpdateDto tagUpdateDto) {
+        TagDto tagDto = tagService.updateTag(tagId, tagUpdateDto);
+        return ResponseEntity.ok(tagDto);
+    }
+}

@@ -1,0 +1,13 @@
+package ru.practicum.eventhub.domain.service;
+
+import org.springframework.data.domain.Pageable;
+import ru.practicum.eventhub.api.dto.response.UserMetadataDto;
+import ru.practicum.eventhub.domain.dto.PagedResponse;
+
+import java.util.UUID;
+
+public interface UserMetadataService {
+    PagedResponse<UserMetadataDto> getUserMetadata(Pageable pageable);
+
+    UserMetadataDto getByUserId(UUID userId);
+}

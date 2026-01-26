@@ -2,11 +2,12 @@ plugins {
     id 'java'
     id 'org.springframework.boot' version '3.5.7'
     id 'io.spring.dependency-management' version '1.1.7'
+    id 'org.openapi.generator' version '7.18.0'
 }
 
 group = 'ru.practicum'
 version = '0.0.1-SNAPSHOT'
-description = 'spring-test'
+description = 'EventHub'
 
 java {
     toolchain {
@@ -25,18 +26,80 @@ repositories {
 }
 
 dependencies {
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+    implementation "org.mapstruct:mapstruct:${mapstructVersion}"
     implementation 'org.flywaydb:flyway-core'
     implementation 'org.flywaydb:flyway-database-postgresql'
+    implementation "io.swagger.core.v3:swagger-annotations:${swaggerVersion}"
     compileOnly 'org.projectlombok:lombok'
     runtimeOnly 'org.postgresql:postgresql'
     annotationProcessor 'org.projectlombok:lombok'
+    annotationProcessor "org.mapstruct:mapstruct-processor:${mapstructVersion}"
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.springframework.boot:spring-boot-testcontainers'
     testImplementation 'org.testcontainers:junit-jupiter'
     testImplementation 'org.testcontainers:postgresql'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+openApiGenerate {
+    generatorName = "spring"
+    inputSpec = "$rootDir/src/main/resources/openapi/openapi.yml"
+    outputDir = layout.buildDirectory.dir("generated").get().asFile.absolutePath
+    apiPackage = "ru.practicum.eventhub.api"
+    modelPackage = "ru.practicum.eventhub.api.model"
+
+    importMappings = [
+            "UserCreateDto"        : "ru.practicum.eventhub.api.dto.request.UserCreateDto",
+            "UserUpdateDto"        : "ru.practicum.eventhub.api.dto.request.UserUpdateDto",
+            "UserDto"              : "ru.practicum.eventhub.api.dto.response.UserDto",
+
+            "UserMetadataCreateDto": "ru.practicum.eventhub.api.dto.request.UserMetadataCreateDto",
+            "UserMetadataUpdateDto": "ru.practicum.eventhub.api.dto.request.UserMetadataUpdateDto",
+            "UserMetadataDto"      : "ru.practicum.eventhub.api.dto.response.UserMetadataDto",
+
+            "CategoryCreateDto"    : "ru.practicum.eventhub.api.dto.request.CategoryCreateDto",
+            "CategoryUpdateDto"    : "ru.practicum.eventhub.api.dto.request.CategoryUpdateDto",
+            "CategoryDto"          : "ru.practicum.eventhub.api.dto.response.CategoryDto",
+
+            "ProjectCreateDto"     : "ru.practicum.eventhub.api.dto.request.ProjectCreateDto",
+            "ProjectUpdateDto"     : "ru.practicum.eventhub.api.dto.request.ProjectUpdateDto",
+            "ProjectDto"           : "ru.practicum.eventhub.api.dto.response.ProjectDto",
+
+            "EventCreateDto"       : "ru.practicum.eventhub.api.dto.request.EventCreateDto",
+            "EventUpdateDto"       : "ru.practicum.eventhub.api.dto.request.EventUpdateDto",
+            "EventDto"             : "ru.practicum.eventhub.api.dto.response.EventDto",
+
+            "TagCreateDto"         : "ru.practicum.eventhub.api.dto.request.TagCreateDto",
+            "TagUpdateDto"         : "ru.practicum.eventhub.api.dto.request.TagUpdateDto",
+            "TagDto"               : "ru.practicum.eventhub.api.dto.response.TagDto",
+
+            "ErrorResponse"        : "ru.practicum.eventhub.api.exception.ErrorResponse"
+    ]
+
+    configOptions = [
+            interfaceOnly       : "true",
+            skipDefaultInterface: "true",
+            useSpringBoot3      : "true",
+            useBeanValidation   : "true",
+            dateLibrary         : "java8",
+            openApiNullable     : "false"
+    ]
+}
+
+sourceSets {
+    main {
+        java {
+            srcDir "$buildDir/generated/src/main/java"
+        }
+    }
+}
+
+tasks.named('compileJava') {
+    dependsOn tasks.openApiGenerate
 }
 
 tasks.named('test') {
