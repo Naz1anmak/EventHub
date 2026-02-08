@@ -2,6 +2,8 @@ package ru.practicum.eventhub.domain.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -60,6 +62,7 @@ public class EventServiceImpl implements EventService {
 
     @Override
     @Transactional
+    @CachePut(value = "events", key = "#id")
     public EventDto updateEvent(UUID id, EventUpdateDto dto) {
         Event event = eventReadService.findByIdForUpdate(id);
 
@@ -74,6 +77,7 @@ public class EventServiceImpl implements EventService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "events", key = "#id")
     public void deleteEvent(UUID id) {
         eventReadService.findById(id);
         eventRepository.deleteById(id);

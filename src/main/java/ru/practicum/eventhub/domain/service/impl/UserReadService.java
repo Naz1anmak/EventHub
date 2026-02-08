@@ -3,6 +3,7 @@ package ru.practicum.eventhub.domain.service.impl;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.eventhub.api.exception.ConflictException;
@@ -18,6 +19,7 @@ public class UserReadService {
     private final UserRepository userRepository;
 
     @Transactional(readOnly = true)
+    @Cacheable(value = "users", key = "#id")
     public User findById(UUID id) {
         return userRepository.findById(id).orElseThrow(() -> {
             log.error("Пользователь с id={} не найден", id);

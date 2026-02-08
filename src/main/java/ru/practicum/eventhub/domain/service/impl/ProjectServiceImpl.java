@@ -2,6 +2,8 @@ package ru.practicum.eventhub.domain.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -53,6 +55,7 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     @Transactional
+    @CachePut(value = "projects", key = "#projectId")
     public ProjectDto updateForCategory(UUID categoryId, UUID projectId, ProjectUpdateDto dto) {
         categoryReadService.findById(categoryId);
         Project project = projectReadService.findByIdAndCategoryId(projectId, categoryId);
@@ -67,6 +70,7 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "projects", key = "#projectId")
     public void deleteForCategory(UUID categoryId, UUID projectId) {
         Category category = categoryReadService.findById(categoryId);
         Project project = projectReadService.findByIdAndCategoryId(projectId, categoryId);

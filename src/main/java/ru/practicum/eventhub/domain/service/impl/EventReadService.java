@@ -3,6 +3,7 @@ package ru.practicum.eventhub.domain.service.impl;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.eventhub.domain.model.Event;
@@ -17,6 +18,7 @@ public class EventReadService {
     private final EventRepository eventRepository;
 
     @Transactional(readOnly = true)
+    @Cacheable(value = "events", key = "#id")
     public Event findById(UUID id) {
         return eventRepository.findById(id).orElseThrow(() -> {
             log.error("Событие с id={} не найдено", id);

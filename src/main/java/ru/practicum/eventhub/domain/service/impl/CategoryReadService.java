@@ -3,6 +3,7 @@ package ru.practicum.eventhub.domain.service.impl;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.eventhub.api.exception.ConflictException;
@@ -18,6 +19,7 @@ public class CategoryReadService {
     private final CategoryRepository categoryRepository;
 
     @Transactional(readOnly = true)
+    @Cacheable(value = "categories", key = "#id")
     public Category findById(UUID id) {
         return categoryRepository.findById(id).orElseThrow(() -> {
             log.error("Категория с id={} не найдена", id);

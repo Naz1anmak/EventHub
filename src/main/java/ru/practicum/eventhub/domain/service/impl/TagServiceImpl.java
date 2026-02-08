@@ -2,6 +2,8 @@ package ru.practicum.eventhub.domain.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -92,6 +94,7 @@ public class TagServiceImpl implements TagService {
 
     @Override
     @Transactional
+    @CachePut(value = "tags", key = "#tagId")
     public TagDto updateTag(UUID tagId, TagUpdateDto dto) {
         Tag tag = tagReadService.findById(tagId);
 
@@ -116,6 +119,7 @@ public class TagServiceImpl implements TagService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "tags", key = "#tagId")
     public void deleteTag(UUID tagId) {
         Tag tag = tagReadService.findById(tagId);
 

@@ -2,6 +2,8 @@ package ru.practicum.eventhub.domain.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -56,12 +58,14 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional(readOnly = true)
     public UserDto getUserById(UUID id) {
+        User user = userReadService.findById(id);
         log.info("Запрошен пользователь с id={}", id);
-        return userMapper.toDto(userReadService.findById(id));
+        return userMapper.toDto(user);
     }
 
     @Override
     @Transactional
+    @CachePut(value = "users", key = "#id")
     public UserDto updateUser(UUID id, UserUpdateDto dto) {
         User user = userReadService.findByIdForUpdate(id);
 
@@ -76,6 +80,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "users", key = "#id")
     public void deleteUser(UUID id) {
         userReadService.findById(id);
         userRepository.deleteById(id);

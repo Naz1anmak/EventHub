@@ -2,6 +2,8 @@ package ru.practicum.eventhub.domain.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -61,6 +63,7 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     @Transactional
+    @CachePut(value = "categories", key = "#id")
     public CategoryDto updateCategory(UUID id, CategoryUpdateDto dto) {
         Category category = categoryReadService.findByIdForUpdate(id);
 
@@ -75,6 +78,7 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "categories", key = "#id")
     public void deleteCategory(UUID id) {
         categoryReadService.findById(id);
         categoryRepository.deleteById(id);
