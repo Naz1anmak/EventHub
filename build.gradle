@@ -1,8 +1,8 @@
 plugins {
     id 'java'
-    id 'org.springframework.boot' version '3.5.7'
-    id 'io.spring.dependency-management' version '1.1.7'
-    id 'org.openapi.generator' version '7.18.0'
+    id 'org.springframework.boot' version "${springBootVersion}"
+    id 'io.spring.dependency-management' version "${dependencyManagementVersion}"
+    id 'org.openapi.generator' version "${openapiGeneratorVersion}"
 }
 
 group = 'ru.practicum'
@@ -13,6 +13,10 @@ java {
     toolchain {
         languageVersion = JavaLanguageVersion.of(21)
     }
+}
+
+ext {
+    set('springCloudVersion', "2024.0.0")
 }
 
 configurations {
@@ -32,6 +36,7 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     implementation 'org.springframework.boot:spring-boot-starter-cache'
     implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+    implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
     implementation "org.mapstruct:mapstruct:${mapstructVersion}"
     implementation 'org.flywaydb:flyway-core'
     implementation 'org.flywaydb:flyway-database-postgresql'
@@ -45,6 +50,12 @@ dependencies {
     testImplementation 'org.testcontainers:junit-jupiter'
     testImplementation 'org.testcontainers:postgresql'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+dependencyManagement {
+    imports {
+        mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
+    }
 }
 
 openApiGenerate {
@@ -78,6 +89,7 @@ openApiGenerate {
             "TagCreateDto"         : "ru.practicum.eventhub.api.dto.request.TagCreateDto",
             "TagUpdateDto"         : "ru.practicum.eventhub.api.dto.request.TagUpdateDto",
             "TagDto"               : "ru.practicum.eventhub.api.dto.response.TagDto",
+            "TagWithStatsDto": "ru.practicum.eventhub.api.dto.response.TagWithStatsDto",
 
             "ErrorResponse"        : "ru.practicum.eventhub.api.exception.ErrorResponse"
     ]

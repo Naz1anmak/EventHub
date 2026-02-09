@@ -1139,7 +1139,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/TagDto'
+                $ref: '#/components/schemas/TagWithStatsDto'
         '400':
           description: Некорректный id
           content:
@@ -1697,6 +1697,38 @@ components:
           description: Список событий с этим тегом
           items:
             $ref: '#/components/schemas/EventShortDto'
+
+    TagWithStatsDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Идентификатор тега
+          example: "c1d2e3f4-5678-1234-abcd-9876543210ab"
+        name:
+          type: string
+          description: Название тега
+          example: "Java"
+        description:
+          type: string
+          description: Описание тега
+          example: "Тег для событий, связанных с Java."
+        events:
+          type: array
+          description: Список событий с этим тегом
+          items:
+            $ref: '#/components/schemas/EventDto'
+        usageCount:
+          type: integer
+          format: int64
+          description: Число использований
+          example: 5
+        lastUsedAt:
+          type: string
+          format: date-time
+          description: Дата и время последнего изменения статистики
+          example: "2025-11-05T15:30:00+03:00"
 
     TagShortDto:
       type: object

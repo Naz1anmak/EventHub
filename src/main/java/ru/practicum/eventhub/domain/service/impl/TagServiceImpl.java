@@ -11,6 +11,8 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.eventhub.api.dto.request.TagCreateDto;
 import ru.practicum.eventhub.api.dto.request.TagUpdateDto;
 import ru.practicum.eventhub.api.dto.response.TagDto;
+import ru.practicum.eventhub.api.dto.response.TagStatsDto;
+import ru.practicum.eventhub.api.dto.response.TagWithStatsDto;
 import ru.practicum.eventhub.api.exception.ConflictException;
 import ru.practicum.eventhub.api.mapper.TagMapper;
 import ru.practicum.eventhub.domain.dto.PagedResponse;
@@ -20,6 +22,7 @@ import ru.practicum.eventhub.domain.repository.TagRepository;
 import ru.practicum.eventhub.domain.service.TagService;
 import ru.practicum.eventhub.domain.util.PageValidator;
 import ru.practicum.eventhub.domain.validation.TagValidationService;
+import ru.practicum.eventhub.infrastructure.TagAnalyticsClient;
 
 import java.util.Iterator;
 import java.util.UUID;
@@ -33,6 +36,7 @@ public class TagServiceImpl implements TagService {
     private final TagReadService tagReadService;
     private final EventReadService eventReadService;
     private final TagValidationService tagValidationService;
+    private final TagAnalyticsClient tagAnalyticsClient;
 
     @Override
     @Transactional
@@ -57,6 +61,8 @@ public class TagServiceImpl implements TagService {
         }
 
         event.addTag(tag);
+        tagAnalyticsClient.incrementUsage(tag.getId());
+
         log.info("Тег с id={} добавлен к событию с id={}", tagId, eventId);
         return tagMapper.toDto(tag);
     }
@@ -85,11 +91,14 @@ public class TagServiceImpl implements TagService {
 
     @Override
     @Transactional(readOnly = true)
-    public TagDto getTagByEvent(UUID eventId, UUID tagId) {
+    public TagWithStatsDto getTagByEvent(UUID eventId, UUID tagId) {
         eventReadService.findById(eventId);
         Tag tag = tagReadService.findByIdAndEventsId(tagId, eventId);
+
+        TagStatsDto stats = tagAnalyticsClient.getStats(tagId);
+
         log.info("Запрошен тег с id={} для события с id={}", tagId, eventId);
-        return tagMapper.toDto(tag);
+        return tagMapper.toDtoWithStats(tag, stats);
     }
 
     @Override

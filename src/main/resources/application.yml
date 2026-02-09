@@ -29,3 +29,7 @@ spring:
     redis:
       host: localhost
       port: 6379
+
+services:
+  tag-analytics:
+    url: http://localhost:8081

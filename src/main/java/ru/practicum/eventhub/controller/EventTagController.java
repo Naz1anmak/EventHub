@@ -12,6 +12,7 @@ import ru.practicum.eventhub.api.dto.request.TagCreateDto;
 import ru.practicum.eventhub.api.dto.request.TagUpdateDto;
 import ru.practicum.eventhub.api.dto.response.EventDto;
 import ru.practicum.eventhub.api.dto.response.TagDto;
+import ru.practicum.eventhub.api.dto.response.TagWithStatsDto;
 import ru.practicum.eventhub.api.model.PageOfEvents;
 import ru.practicum.eventhub.api.model.PageOfTags;
 import ru.practicum.eventhub.application.EventApplicationService;
@@ -90,8 +91,8 @@ public class EventTagController implements EventsApi {
     }
 
     @Override
-    public ResponseEntity<TagDto> getTagByEventId(UUID eventId, UUID tagId) {
-        TagDto tagDto = tagService.getTagByEvent(eventId, tagId);
+    public ResponseEntity<TagWithStatsDto> getTagByEventId(UUID eventId, UUID tagId) {
+        TagWithStatsDto tagDto = tagService.getTagByEvent(eventId, tagId);
         return ResponseEntity.ok(tagDto);
     }
 
