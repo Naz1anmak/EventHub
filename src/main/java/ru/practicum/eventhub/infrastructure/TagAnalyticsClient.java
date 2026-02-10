@@ -5,10 +5,15 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import ru.practicum.eventhub.api.dto.response.TagStatsDto;
+import ru.practicum.eventhub.infrastructure.fallback.TagAnalyticsFallback;
 
 import java.util.UUID;
 
-@FeignClient(name = "tag-analytics", url = "${services.tag-analytics.url}")
+@FeignClient(
+        name = "tag-analytics",
+        url = "${services.tag-analytics.url}",
+        fallback = TagAnalyticsFallback.class
+)
 public interface TagAnalyticsClient {
 
     @PostMapping("/api/v1/tags/{id}/used")
