@@ -4,6 +4,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -13,6 +15,7 @@ import ru.practicum.eventhub.api.dto.request.CategoryUpdateDto;
 import ru.practicum.eventhub.api.dto.response.CategoryDto;
 import ru.practicum.eventhub.api.mapper.CategoryMapper;
 import ru.practicum.eventhub.domain.dto.PagedResponse;
+import ru.practicum.eventhub.domain.event.CategoryDeletedEvent;
 import ru.practicum.eventhub.domain.model.Category;
 import ru.practicum.eventhub.domain.repository.CategoryRepository;
 import ru.practicum.eventhub.domain.service.CategoryService;
@@ -29,6 +32,7 @@ public class CategoryServiceImpl implements CategoryService {
     private final CategoryMapper categoryMapper;
     private final CategoryReadService categoryReadService;
     private final CategoryValidationService categoryValidationService;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Override
     @Transactional
@@ -55,6 +59,7 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     @Transactional(readOnly = true)
+    @Cacheable(value = "categories", key = "#id")
     public CategoryDto getCategoryById(UUID id) {
         Category category = categoryReadService.findById(id);
         log.info("Отправлена категория c id={}", id);
@@ -82,6 +87,8 @@ public class CategoryServiceImpl implements CategoryService {
     public void deleteCategory(UUID id) {
         categoryReadService.findById(id);
         categoryRepository.deleteById(id);
+
+        eventPublisher.publishEvent(new CategoryDeletedEvent(id));
         log.info("Удалена категория с id={}", id);
     }
 }

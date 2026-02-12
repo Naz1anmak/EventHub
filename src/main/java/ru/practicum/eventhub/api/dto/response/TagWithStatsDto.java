@@ -3,7 +3,6 @@ package ru.practicum.eventhub.api.dto.response;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import ru.practicum.eventhub.api.model.EventShortDto;
 
-import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -13,7 +12,6 @@ public record TagWithStatsDto(
         String name,
         String description,
         List<EventShortDto> events,
-        Long usageCount,
-        OffsetDateTime lastUsedAt
+        TagStatsDto stats
 ) {
 }

@@ -3,7 +3,6 @@ package ru.practicum.eventhub.domain.service.impl;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.eventhub.api.exception.ConflictException;
@@ -19,7 +18,6 @@ public class MetadataReadService {
     private final UserMetadataRepository userMetadataRepository;
 
     @Transactional(readOnly = true)
-    @Cacheable(value = "userMetadata", key = "#userId")
     public UserMetadata findByUserId(UUID userId) {
         return userMetadataRepository.findByUserId(userId).orElseThrow(() -> {
             log.error("User-metadata для user с id={} не найдена", userId);

@@ -2,6 +2,7 @@ package ru.practicum.eventhub.domain.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -38,6 +39,7 @@ public class UserMetadataServiceImpl implements UserMetadataService {
 
     @Override
     @Transactional(readOnly = true)
+    @Cacheable(value = "userMetadata", key = "#userId")
     public UserMetadataDto getByUserId(UUID userId) {
         userReadService.findById(userId);
         UserMetadata userMetadata = metadataReadService.findByUserId(userId);

@@ -2,8 +2,7 @@ package ru.practicum.eventhub.domain.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -14,21 +13,32 @@ import ru.practicum.eventhub.api.dto.response.EventDto;
 import ru.practicum.eventhub.api.mapper.EventMapper;
 import ru.practicum.eventhub.domain.dto.PagedResponse;
 import ru.practicum.eventhub.domain.model.Event;
+import ru.practicum.eventhub.domain.model.Tag;
 import ru.practicum.eventhub.domain.repository.EventRepository;
 import ru.practicum.eventhub.domain.service.EventService;
 import ru.practicum.eventhub.domain.util.PageValidator;
 import ru.practicum.eventhub.domain.validation.EventValidationService;
+import ru.practicum.eventhub.infrastructure.cache.EventCacheService;
+import ru.practicum.eventhub.infrastructure.cache.ManyToManyCacheIndexService;
+import ru.practicum.eventhub.infrastructure.cache.TagCacheService;
 
+import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class EventServiceImpl implements EventService {
+    private static final String EVENT_TAG_RELATION = "event_tag";
+
     private final EventRepository eventRepository;
     private final EventReadService eventReadService;
     private final EventMapper eventMapper;
     private final EventValidationService eventValidationService;
+    private final EventCacheService eventCacheService;
+    private final ManyToManyCacheIndexService relationIndexService;
+    private final TagCacheService tagCacheService;
 
     @Override
     @Transactional
@@ -54,6 +64,7 @@ public class EventServiceImpl implements EventService {
 
     @Override
     @Transactional(readOnly = true)
+    @Cacheable(value = "events", key = "#id")
     public EventDto getEventById(UUID id) {
         Event event = eventReadService.findById(id);
         log.info("Запрошено событие с id={}", id);
@@ -62,25 +73,40 @@ public class EventServiceImpl implements EventService {
 
     @Override
     @Transactional
-    @CachePut(value = "events", key = "#id")
     public EventDto updateEvent(UUID id, EventUpdateDto dto) {
         Event event = eventReadService.findByIdForUpdate(id);
 
         eventValidationService.validateUpdate(dto);
 
+        Set<UUID> oldTagIds = event.getTags().stream().map(Tag::getId).collect(Collectors.toSet());
         event = eventMapper.updateEventFromDto(dto, event);
-
         event = eventRepository.save(event);
+
+        Set<UUID> addedTagIds = event.getTags().stream().map(Tag::getId).collect(Collectors.toSet());
+        addedTagIds.removeAll(oldTagIds);
+
+        for (UUID tagId : addedTagIds) {
+            relationIndexService.add(EVENT_TAG_RELATION, id, tagId);
+        }
+        eventCacheService.refresh(id);
+        for (UUID tagId : addedTagIds) {
+            tagCacheService.refreshByEvent(id, tagId);
+        }
+
         log.info("Обновлено событие с id={}", id);
         return eventMapper.toDto(event);
     }
 
     @Override
     @Transactional
-    @CacheEvict(value = "events", key = "#id")
     public void deleteEvent(UUID id) {
         eventReadService.findById(id);
         eventRepository.deleteById(id);
+
+        relationIndexService.deleteLeft(EVENT_TAG_RELATION, id);
+
+        eventCacheService.evict(id);
+
         log.info("Удалено событие с id={}", id);
     }
 }

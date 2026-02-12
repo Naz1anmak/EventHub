@@ -19,6 +19,6 @@ public class TagAnalyticsFallback implements TagAnalyticsClient {
     @Override
     public TagStatsDto getStats(UUID id) {
         log.warn("Сервис Tag Analytics недоступен. Не удалось получить статистику для тега с id={}", id);
-        return null;
+        return new TagStatsDto(0L, null);
     }
 }

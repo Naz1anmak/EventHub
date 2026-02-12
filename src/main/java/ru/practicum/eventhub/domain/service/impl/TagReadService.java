@@ -3,7 +3,6 @@ package ru.practicum.eventhub.domain.service.impl;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.eventhub.api.exception.ConflictException;
@@ -19,7 +18,6 @@ public class TagReadService {
     private final TagRepository tagRepository;
 
     @Transactional(readOnly = true)
-    @Cacheable(value = "tags", key = "#tagId")
     public Tag findById(UUID tagId) {
         return tagRepository.findById(tagId).orElseThrow(() -> {
             log.error("Тег с id={} не найден", tagId);

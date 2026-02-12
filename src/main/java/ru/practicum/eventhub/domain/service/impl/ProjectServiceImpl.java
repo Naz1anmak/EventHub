@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -18,6 +19,8 @@ import ru.practicum.eventhub.domain.repository.ProjectRepository;
 import ru.practicum.eventhub.domain.service.ProjectService;
 import ru.practicum.eventhub.domain.util.PageValidator;
 import ru.practicum.eventhub.domain.validation.ProjectValidationService;
+import ru.practicum.eventhub.infrastructure.cache.CategoryCacheService;
+import ru.practicum.eventhub.infrastructure.cache.ProjectCacheIndexService;
 
 import java.util.UUID;
 
@@ -30,6 +33,8 @@ public class ProjectServiceImpl implements ProjectService {
     private final ProjectReadService projectReadService;
     private final CategoryReadService categoryReadService;
     private final ProjectValidationService projectValidationService;
+    private final ProjectCacheIndexService cacheIndexService;
+    private final CategoryCacheService categoryCacheService;
 
     @Override
     @Transactional(readOnly = true)
@@ -45,9 +50,12 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     @Transactional(readOnly = true)
+    @Cacheable(value = "projects", key = "#categoryId + ':' + #projectId")
     public ProjectDto getProjectByCategory(UUID categoryId, UUID projectId) {
         categoryReadService.findById(categoryId);
         Project project = projectReadService.findByIdAndCategoryId(projectId, categoryId);
+
+        cacheIndexService.addProject(categoryId, projectId);
 
         log.info("Запрошен проект с id={} в категории с id={}", projectId, categoryId);
         return projectMapper.toDto(project);
@@ -55,7 +63,7 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     @Transactional
-    @CachePut(value = "projects", key = "#projectId")
+    @CachePut(value = "projects", key = "#categoryId + ':' + #projectId")
     public ProjectDto updateForCategory(UUID categoryId, UUID projectId, ProjectUpdateDto dto) {
         categoryReadService.findById(categoryId);
         Project project = projectReadService.findByIdAndCategoryId(projectId, categoryId);
@@ -70,12 +78,16 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     @Transactional
-    @CacheEvict(value = "projects", key = "#projectId")
+    @CacheEvict(value = "projects", key = "#categoryId + ':' + #projectId")
     public void deleteForCategory(UUID categoryId, UUID projectId) {
         Category category = categoryReadService.findById(categoryId);
         Project project = projectReadService.findByIdAndCategoryId(projectId, categoryId);
 
         category.removeProject(project);
+
+        cacheIndexService.removeProject(categoryId, projectId);
+        categoryCacheService.refresh(categoryId);
+
         log.info("Удален проект с id={} в категории с id={}", projectId, categoryId);
     }
 }

@@ -17,6 +17,6 @@ public record EventDto(
         OffsetDateTime updatedAt,
         List<TagShortDto> tags
 ) {
-    public record TagShortDto(UUID id, String name) {
+    public record TagShortDto(UUID id) {
     }
 }

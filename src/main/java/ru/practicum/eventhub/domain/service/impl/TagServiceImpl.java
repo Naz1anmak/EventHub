@@ -2,8 +2,8 @@ package ru.practicum.eventhub.domain.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -23,20 +23,29 @@ import ru.practicum.eventhub.domain.service.TagService;
 import ru.practicum.eventhub.domain.util.PageValidator;
 import ru.practicum.eventhub.domain.validation.TagValidationService;
 import ru.practicum.eventhub.infrastructure.TagAnalyticsClient;
+import ru.practicum.eventhub.infrastructure.cache.EventCacheService;
+import ru.practicum.eventhub.infrastructure.cache.ManyToManyCacheIndexService;
+import ru.practicum.eventhub.infrastructure.cache.TagCacheService;
 
 import java.util.Iterator;
+import java.util.Set;
 import java.util.UUID;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class TagServiceImpl implements TagService {
+    private static final String EVENT_TAG_RELATION = "event_tag";
+
     private final TagRepository tagRepository;
     private final TagMapper tagMapper;
     private final TagReadService tagReadService;
     private final EventReadService eventReadService;
     private final TagValidationService tagValidationService;
     private final TagAnalyticsClient tagAnalyticsClient;
+    private final EventCacheService eventCacheService;
+    private final TagCacheService tagCacheService;
+    private final ManyToManyCacheIndexService relationIndexService;
 
     @Override
     @Transactional
@@ -61,6 +70,11 @@ public class TagServiceImpl implements TagService {
         }
 
         event.addTag(tag);
+        relationIndexService.add(EVENT_TAG_RELATION, eventId, tagId);
+
+        eventCacheService.refresh(eventId);
+        tagCacheService.refresh(tagId);
+
         tagAnalyticsClient.incrementUsage(tag.getId());
 
         log.info("Тег с id={} добавлен к событию с id={}", tagId, eventId);
@@ -91,6 +105,7 @@ public class TagServiceImpl implements TagService {
 
     @Override
     @Transactional(readOnly = true)
+    @Cacheable(value = "tags_by_event", key = "#eventId + ':' + #tagId")
     public TagWithStatsDto getTagByEvent(UUID eventId, UUID tagId) {
         eventReadService.findById(eventId);
         Tag tag = tagReadService.findByIdAndEventsId(tagId, eventId);
@@ -112,6 +127,10 @@ public class TagServiceImpl implements TagService {
         tag = tagMapper.updateTagFromDto(dto, tag);
 
         tag = tagRepository.save(tag);
+
+        Set<UUID> eventIds = relationIndexService.getLeftIds(EVENT_TAG_RELATION, tagId);
+        tagCacheService.refreshByEventBatch(tagId, eventIds);
+
         log.info("Обновлен тег с id={}", tagId);
         return tagMapper.toDto(tag);
     }
@@ -123,12 +142,16 @@ public class TagServiceImpl implements TagService {
         Tag tag = tagReadService.findByIdAndEventsId(tagId, eventId);
 
         event.removeTag(tag);
+        relationIndexService.remove(EVENT_TAG_RELATION, eventId, tagId);
+
+        eventCacheService.refresh(eventId);
+        tagCacheService.refreshByEvent(eventId, tagId);
+
         log.info("Тег с id={} отвязан от события с id={}", tagId, eventId);
     }
 
     @Override
     @Transactional
-    @CacheEvict(value = "tags", key = "#tagId")
     public void deleteTag(UUID tagId) {
         Tag tag = tagReadService.findById(tagId);
 
@@ -140,6 +163,9 @@ public class TagServiceImpl implements TagService {
         }
 
         tagRepository.deleteById(tagId);
+
+        tagCacheService.evictAll(tagId);
+
         log.info("Удален тег с id={}", tagId);
     }
 }
