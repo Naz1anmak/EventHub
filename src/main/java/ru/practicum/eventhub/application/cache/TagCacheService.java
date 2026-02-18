@@ -1,4 +1,4 @@
-package ru.practicum.eventhub.infrastructure.cache;
+package ru.practicum.eventhub.application.cache;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -8,14 +8,13 @@ import org.springframework.cache.annotation.CachePut;
 import org.springframework.stereotype.Component;
 import ru.practicum.eventhub.api.dto.response.TagDto;
 import ru.practicum.eventhub.api.dto.response.TagStatsDto;
+import ru.practicum.eventhub.api.dto.response.TagWithStatsDto;
 import ru.practicum.eventhub.api.mapper.TagMapper;
-import ru.practicum.eventhub.domain.model.Event;
 import ru.practicum.eventhub.domain.model.Tag;
-import ru.practicum.eventhub.domain.repository.TagRepository;
 import ru.practicum.eventhub.domain.service.impl.TagReadService;
-import ru.practicum.eventhub.infrastructure.TagAnalyticsClient;
+import ru.practicum.eventhub.infrastructure.feign.TagAnalyticsClient;
+import ru.practicum.eventhub.infrastructure.redis.ManyToManyCacheIndexService;
 
-import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
@@ -30,7 +29,6 @@ public class TagCacheService {
     private final ManyToManyCacheIndexService relationIndexService;
     private final CacheManager cacheManager;
     private final TagAnalyticsClient tagAnalyticsClient;
-    private final TagRepository tagRepository;
 
     @CachePut(value = "tags", key = "#tagId")
     public TagDto refresh(UUID tagId) {
@@ -40,35 +38,34 @@ public class TagCacheService {
     }
 
     public void refreshByEvent(UUID eventId, UUID tagId) {
+        Cache cache = cacheManager.getCache("tags_by_event");
+        if (cache == null) return;
+
         Tag tag = tagReadService.findByIdAndEventsId(tagId, eventId);
         TagStatsDto stats = tagAnalyticsClient.getStats(tagId);
 
-        Cache cache = cacheManager.getCache("tags_by_event");
-        if (cache != null) {
-            cache.put(eventId + ":" + tagId, tagMapper.toDtoWithStats(tag, stats));
+        TagWithStatsDto dto = tagMapper.toDtoWithStats(tag, stats);
 
-            log.info("Обновлен кэш тега с id={} для события с id={}", tagId, eventId);
-        }
+        cache.put(eventId + ":" + tagId, dto);
+
+        log.info("Обновлен кэш тега с id={} для события с id={}", tagId, eventId);
     }
 
-    public void refreshByEventBatch(UUID tagId, Set<UUID> eventIds) {
+    public void refreshCompositeCacheForTag(UUID tagId, Set<UUID> eventIds) {
         if (eventIds == null || eventIds.isEmpty()) return;
-
-        List<Tag> tags = tagRepository.findAllByTagIdAndEventIds(tagId, eventIds);
 
         Cache cache = cacheManager.getCache("tags_by_event");
         if (cache == null) return;
 
+        Tag tag = tagReadService.findById(tagId);
         TagStatsDto stats = tagAnalyticsClient.getStats(tagId);
 
-        for (Tag tag : tags) {
-            for (Event e : tag.getEvents()) {
-                if (eventIds.contains(e.getId())) {
-                    cache.put(e.getId() + ":" + tagId, tagMapper.toDtoWithStats(tag, stats));
+        TagWithStatsDto dto = tagMapper.toDtoWithStats(tag, stats);
 
-                    log.info("Обновлен кэш тега с id={} для события с id={}", tagId, e.getId());
-                }
-            }
+        for (UUID eventId : eventIds) {
+            cache.put(eventId + ":" + tagId, dto);
+
+            log.info("Обновлен кэш тега с id={} для события с id={}", tagId, eventId);
         }
     }
 

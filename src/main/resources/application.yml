@@ -45,12 +45,15 @@ resilience4j:
 
   retry:
     instances:
-      tagAnalytics:
+      tag-analytics:
         maxAttempts: 3
         waitDuration: 500ms
         exponentialBackoffMultiplier: 2
         enableRandomizedWait: true
         randomizedWaitFactor: 0.5
+        ignoreExceptions:
+          - ru.practicum.eventhub.infrastructure.feign.exception.TagAnalyticsClientException
+          - ru.practicum.eventhub.infrastructure.feign.exception.TagNotFoundException
 
 services:
   tag-analytics:

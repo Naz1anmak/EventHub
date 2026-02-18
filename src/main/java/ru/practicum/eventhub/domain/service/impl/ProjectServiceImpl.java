@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.eventhub.api.dto.request.ProjectUpdateDto;
 import ru.practicum.eventhub.api.dto.response.ProjectDto;
 import ru.practicum.eventhub.api.mapper.ProjectMapper;
+import ru.practicum.eventhub.application.cache.CategoryCacheService;
 import ru.practicum.eventhub.domain.dto.PagedResponse;
 import ru.practicum.eventhub.domain.model.Category;
 import ru.practicum.eventhub.domain.model.Project;
@@ -19,8 +20,7 @@ import ru.practicum.eventhub.domain.repository.ProjectRepository;
 import ru.practicum.eventhub.domain.service.ProjectService;
 import ru.practicum.eventhub.domain.util.PageValidator;
 import ru.practicum.eventhub.domain.validation.ProjectValidationService;
-import ru.practicum.eventhub.infrastructure.cache.CategoryCacheService;
-import ru.practicum.eventhub.infrastructure.cache.ProjectCacheIndexService;
+import ru.practicum.eventhub.infrastructure.redis.ProjectCacheIndexService;
 
 import java.util.UUID;
 

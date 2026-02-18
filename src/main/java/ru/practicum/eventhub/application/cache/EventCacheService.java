@@ -1,4 +1,4 @@
-package ru.practicum.eventhub.infrastructure.cache;
+package ru.practicum.eventhub.application.cache;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

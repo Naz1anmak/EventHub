@@ -1,4 +1,4 @@
-package ru.practicum.eventhub.infrastructure.cache;
+package ru.practicum.eventhub.application.cache;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.CacheManager;
@@ -6,6 +6,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
 import ru.practicum.eventhub.domain.event.CategoryDeletedEvent;
+import ru.practicum.eventhub.infrastructure.redis.ProjectCacheIndexService;
 
 import java.util.Optional;
 import java.util.Set;

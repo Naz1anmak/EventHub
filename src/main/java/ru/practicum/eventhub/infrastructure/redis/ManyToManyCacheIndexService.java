@@ -1,4 +1,4 @@
-package ru.practicum.eventhub.infrastructure.cache;
+package ru.practicum.eventhub.infrastructure.redis;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;

@@ -15,6 +15,8 @@ import ru.practicum.eventhub.api.dto.response.TagStatsDto;
 import ru.practicum.eventhub.api.dto.response.TagWithStatsDto;
 import ru.practicum.eventhub.api.exception.ConflictException;
 import ru.practicum.eventhub.api.mapper.TagMapper;
+import ru.practicum.eventhub.application.cache.EventCacheService;
+import ru.practicum.eventhub.application.cache.TagCacheService;
 import ru.practicum.eventhub.domain.dto.PagedResponse;
 import ru.practicum.eventhub.domain.model.Event;
 import ru.practicum.eventhub.domain.model.Tag;
@@ -22,10 +24,8 @@ import ru.practicum.eventhub.domain.repository.TagRepository;
 import ru.practicum.eventhub.domain.service.TagService;
 import ru.practicum.eventhub.domain.util.PageValidator;
 import ru.practicum.eventhub.domain.validation.TagValidationService;
-import ru.practicum.eventhub.infrastructure.TagAnalyticsClient;
-import ru.practicum.eventhub.infrastructure.cache.EventCacheService;
-import ru.practicum.eventhub.infrastructure.cache.ManyToManyCacheIndexService;
-import ru.practicum.eventhub.infrastructure.cache.TagCacheService;
+import ru.practicum.eventhub.infrastructure.feign.TagAnalyticsClient;
+import ru.practicum.eventhub.infrastructure.redis.ManyToManyCacheIndexService;
 
 import java.util.Iterator;
 import java.util.Set;
@@ -75,7 +75,7 @@ public class TagServiceImpl implements TagService {
         eventCacheService.refresh(eventId);
         tagCacheService.refresh(tagId);
 
-        tagAnalyticsClient.incrementUsage(tag.getId());
+        tagAnalyticsClient.createIfAbsent(tag.getId());
 
         log.info("Тег с id={} добавлен к событию с id={}", tagId, eventId);
         return tagMapper.toDto(tag);
@@ -129,7 +129,7 @@ public class TagServiceImpl implements TagService {
         tag = tagRepository.save(tag);
 
         Set<UUID> eventIds = relationIndexService.getLeftIds(EVENT_TAG_RELATION, tagId);
-        tagCacheService.refreshByEventBatch(tagId, eventIds);
+        tagCacheService.refreshCompositeCacheForTag(tagId, eventIds);
 
         log.info("Обновлен тег с id={}", tagId);
         return tagMapper.toDto(tag);

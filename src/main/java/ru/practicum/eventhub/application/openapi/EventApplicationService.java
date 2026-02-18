@@ -1,4 +1,4 @@
-package ru.practicum.eventhub.application;
+package ru.practicum.eventhub.application.openapi;
 
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;

@@ -12,8 +12,8 @@ import ru.practicum.eventhub.api.dto.response.UserDto;
 import ru.practicum.eventhub.api.dto.response.UserMetadataDto;
 import ru.practicum.eventhub.api.model.PageOfMetadata;
 import ru.practicum.eventhub.api.model.PageOfUsers;
-import ru.practicum.eventhub.application.MetadataApplicationService;
-import ru.practicum.eventhub.application.UserApplicationService;
+import ru.practicum.eventhub.application.openapi.MetadataApplicationService;
+import ru.practicum.eventhub.application.openapi.UserApplicationService;
 import ru.practicum.eventhub.domain.service.UserMetadataService;
 import ru.practicum.eventhub.domain.service.UserService;
 

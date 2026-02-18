@@ -15,8 +15,8 @@ import ru.practicum.eventhub.api.dto.response.TagDto;
 import ru.practicum.eventhub.api.dto.response.TagWithStatsDto;
 import ru.practicum.eventhub.api.model.PageOfEvents;
 import ru.practicum.eventhub.api.model.PageOfTags;
-import ru.practicum.eventhub.application.EventApplicationService;
-import ru.practicum.eventhub.application.TagApplicationService;
+import ru.practicum.eventhub.application.openapi.EventApplicationService;
+import ru.practicum.eventhub.application.openapi.TagApplicationService;
 import ru.practicum.eventhub.domain.service.EventService;
 import ru.practicum.eventhub.domain.service.TagService;
 

@@ -13,8 +13,8 @@ import ru.practicum.eventhub.api.dto.response.CategoryDto;
 import ru.practicum.eventhub.api.dto.response.ProjectDto;
 import ru.practicum.eventhub.api.model.PageOfCategories;
 import ru.practicum.eventhub.api.model.PageOfProjects;
-import ru.practicum.eventhub.application.CategoryApplicationService;
-import ru.practicum.eventhub.application.ProjectApplicationService;
+import ru.practicum.eventhub.application.openapi.CategoryApplicationService;
+import ru.practicum.eventhub.application.openapi.ProjectApplicationService;
 import ru.practicum.eventhub.domain.service.CategoryService;
 import ru.practicum.eventhub.domain.service.ProjectService;
 

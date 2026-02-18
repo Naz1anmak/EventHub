@@ -44,7 +44,7 @@ create table if not exists projects (
   version bigint not null,
   name varchar(100) not null unique,
   description varchar(255),
-  category_id uuid not null references categories(id) on delete cascade,
+  category_id uuid not null references categories(id) on delete restrict,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
     constraint chk_projects_name_length check (char_length(name) between 3 and 100),

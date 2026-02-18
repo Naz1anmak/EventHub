@@ -1680,15 +1680,10 @@ components:
     TagStatsDto:
       type: object
       properties:
-        usageCount:
-          type: integer
-          format: int64
-          description: Число использований
-          example: 5
-        lastUsedAt:
+        createdAt:
           type: string
           format: date-time
-          description: Дата и время последнего изменения статистики
+          description: Дата и время добавления тега к событию
           example: "2025-11-05T15:30:00+03:00"
 
     TagWithStatsDto:
