@@ -13,8 +13,8 @@ import ru.practicum.eventhub.api.dto.response.CategoryDto;
 import ru.practicum.eventhub.api.dto.response.ProjectDto;
 import ru.practicum.eventhub.api.model.PageOfCategories;
 import ru.practicum.eventhub.api.model.PageOfProjects;
-import ru.practicum.eventhub.application.openapi.CategoryApplicationService;
-import ru.practicum.eventhub.application.openapi.ProjectApplicationService;
+import ru.practicum.eventhub.application.openapi.CategoryPageMapper;
+import ru.practicum.eventhub.application.openapi.ProjectPageMapper;
 import ru.practicum.eventhub.domain.service.CategoryService;
 import ru.practicum.eventhub.domain.service.ProjectService;
 
@@ -23,8 +23,8 @@ import java.util.UUID;
 @RestController
 @RequiredArgsConstructor
 public class CategoryProjectController implements CategoriesApi {
-    private final CategoryApplicationService categoryApplicationService;
-    private final ProjectApplicationService projectApplicationService;
+    private final CategoryPageMapper categoryPageMapper;
+    private final ProjectPageMapper projectPageMapper;
     private final CategoryService categoryService;
     private final ProjectService projectService;
 
@@ -54,7 +54,7 @@ public class CategoryProjectController implements CategoriesApi {
 
     @Override
     public ResponseEntity<PageOfCategories> getCategories(Integer page, Integer size) {
-        PageOfCategories pageOfCategories = categoryApplicationService.getCategories(PageRequest.of(page, size));
+        PageOfCategories pageOfCategories = categoryPageMapper.getCategories(PageRequest.of(page, size));
         return ResponseEntity.ok(pageOfCategories);
     }
 
@@ -72,7 +72,7 @@ public class CategoryProjectController implements CategoriesApi {
 
     @Override
     public ResponseEntity<PageOfProjects> getProjectsByCategoryId(UUID categoryId, Integer page, Integer size) {
-        PageOfProjects pageOfProjects = projectApplicationService.getProjectsByCategory(categoryId, PageRequest.of(page, size));
+        PageOfProjects pageOfProjects = projectPageMapper.getProjectsByCategory(categoryId, PageRequest.of(page, size));
         return ResponseEntity.ok(pageOfProjects);
     }
 

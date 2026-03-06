@@ -8,6 +8,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionTemplate;
 import ru.practicum.eventhub.api.dto.request.TagCreateDto;
 import ru.practicum.eventhub.api.dto.request.TagUpdateDto;
 import ru.practicum.eventhub.api.dto.response.TagDto;
@@ -15,6 +16,7 @@ import ru.practicum.eventhub.api.dto.response.TagStatsDto;
 import ru.practicum.eventhub.api.dto.response.TagWithStatsDto;
 import ru.practicum.eventhub.api.exception.ConflictException;
 import ru.practicum.eventhub.api.mapper.TagMapper;
+import ru.practicum.eventhub.application.analytics.TagAnalyticsFacade;
 import ru.practicum.eventhub.application.cache.EventCacheService;
 import ru.practicum.eventhub.application.cache.TagCacheService;
 import ru.practicum.eventhub.domain.dto.PagedResponse;
@@ -24,7 +26,6 @@ import ru.practicum.eventhub.domain.repository.TagRepository;
 import ru.practicum.eventhub.domain.service.TagService;
 import ru.practicum.eventhub.domain.util.PageValidator;
 import ru.practicum.eventhub.domain.validation.TagValidationService;
-import ru.practicum.eventhub.infrastructure.feign.TagAnalyticsClient;
 import ru.practicum.eventhub.infrastructure.redis.ManyToManyCacheIndexService;
 
 import java.util.Iterator;
@@ -42,10 +43,11 @@ public class TagServiceImpl implements TagService {
     private final TagReadService tagReadService;
     private final EventReadService eventReadService;
     private final TagValidationService tagValidationService;
-    private final TagAnalyticsClient tagAnalyticsClient;
+    private final TagAnalyticsFacade tagAnalyticsFacade;
     private final EventCacheService eventCacheService;
     private final TagCacheService tagCacheService;
     private final ManyToManyCacheIndexService relationIndexService;
+    private final TransactionTemplate transactionTemplate;
 
     @Override
     @Transactional
@@ -60,7 +62,7 @@ public class TagServiceImpl implements TagService {
 
     @Override
     @Transactional
-    public TagDto addTagToEvent(UUID eventId, UUID tagId) {
+    public Tag addTagLocal(UUID eventId, UUID tagId) {
         Event event = eventReadService.findById(eventId);
         Tag tag = tagReadService.findById(tagId);
 
@@ -72,13 +74,7 @@ public class TagServiceImpl implements TagService {
         event.addTag(tag);
         relationIndexService.add(EVENT_TAG_RELATION, eventId, tagId);
 
-        eventCacheService.refresh(eventId);
-        tagCacheService.refresh(tagId);
-
-        tagAnalyticsClient.createIfAbsent(tag.getId());
-
-        log.info("Тег с id={} добавлен к событию с id={}", tagId, eventId);
-        return tagMapper.toDto(tag);
+        return tag;
     }
 
     @Override
@@ -104,68 +100,95 @@ public class TagServiceImpl implements TagService {
     }
 
     @Override
-    @Transactional(readOnly = true)
     @Cacheable(value = "tags_by_event", key = "#eventId + ':' + #tagId")
     public TagWithStatsDto getTagByEvent(UUID eventId, UUID tagId) {
-        eventReadService.findById(eventId);
-        Tag tag = tagReadService.findByIdAndEventsId(tagId, eventId);
+        this.transactionTemplate.setReadOnly(true);
+        Tag tag = transactionTemplate.execute(status -> {
+            eventReadService.findById(eventId);
+            return tagReadService.findByIdAndEventsId(tagId, eventId);
+        });
 
-        TagStatsDto stats = tagAnalyticsClient.getStats(tagId);
+        TagStatsDto stats = tagAnalyticsFacade.getTagStats(tagId);
 
         log.info("Запрошен тег с id={} для события с id={}", tagId, eventId);
         return tagMapper.toDtoWithStats(tag, stats);
     }
 
     @Override
-    @Transactional
     @CachePut(value = "tags", key = "#tagId")
     public TagDto updateTag(UUID tagId, TagUpdateDto dto) {
-        Tag tag = tagReadService.findById(tagId);
+        Tag tag = transactionTemplate.execute(status -> {
+            Tag tagEntity = tagReadService.findById(tagId);
 
-        tagValidationService.validateUpdate(dto, tag);
+            tagValidationService.validateUpdate(dto, tagEntity);
 
-        tag = tagMapper.updateTagFromDto(dto, tag);
+            tagEntity = tagMapper.updateTagFromDto(dto, tagEntity);
 
-        tag = tagRepository.save(tag);
+            tagEntity = tagRepository.save(tagEntity);
+            return tagEntity;
+        });
 
         Set<UUID> eventIds = relationIndexService.getLeftIds(EVENT_TAG_RELATION, tagId);
-        tagCacheService.refreshCompositeCacheForTag(tagId, eventIds);
+        tagCacheService.refreshCompositeCacheForTag(tag, eventIds);
 
         log.info("Обновлен тег с id={}", tagId);
         return tagMapper.toDto(tag);
     }
 
     @Override
-    @Transactional
     public void deleteForEvent(UUID eventId, UUID tagId) {
-        Event event = eventReadService.findById(eventId);
-        Tag tag = tagReadService.findByIdAndEventsId(tagId, eventId);
+        transactionTemplate.executeWithoutResult(status -> {
+            Event event = eventReadService.findById(eventId);
+            Tag tag = tagReadService.findByIdAndEventsId(tagId, eventId);
 
-        event.removeTag(tag);
+            event.removeTag(tag);
+        });
+
         relationIndexService.remove(EVENT_TAG_RELATION, eventId, tagId);
 
         eventCacheService.refresh(eventId);
-        tagCacheService.refreshByEvent(eventId, tagId);
+        tagCacheService.refreshByEventBatch(eventId, Set.of(tagId));
 
         log.info("Тег с id={} отвязан от события с id={}", tagId, eventId);
     }
 
     @Override
-    @Transactional
     public void deleteTag(UUID tagId) {
-        Tag tag = tagReadService.findById(tagId);
+        transactionTemplate.executeWithoutResult(status -> {
+            Tag tag = tagReadService.findById(tagId);
 
-        Iterator<Event> iterator = tag.getEvents().iterator();
-        while (iterator.hasNext()) {
-            Event event = iterator.next();
-            iterator.remove();
-            event.getTags().remove(tag);
-        }
+            Iterator<Event> iterator = tag.getEvents().iterator();
+            while (iterator.hasNext()) {
+                Event event = iterator.next();
+                iterator.remove();
+                event.getTags().remove(tag);
+            }
 
-        tagRepository.deleteById(tagId);
+            tagRepository.deleteById(tagId);
+        });
 
         tagCacheService.evictAll(tagId);
 
         log.info("Удален тег с id={}", tagId);
+    }
+
+    @Override
+    public void cacheRefreshAfterAddTag(UUID eventId, UUID tagId) {
+        eventCacheService.refresh(eventId);
+        tagCacheService.refresh(tagId);
+        log.info("Кэш обновлен для события с id={} и тега с id={}", eventId, tagId);
+    }
+
+    @Override
+    @Transactional
+    public void removeTagLocal(UUID eventId, UUID tagId) {
+        Event event = eventReadService.findById(eventId);
+        Tag tag = tagReadService.findById(tagId);
+
+        event.removeTag(tag);
+
+        relationIndexService.remove(EVENT_TAG_RELATION, eventId, tagId);
+
+        log.info("Тег с id={} удален из события с id={}", tagId, eventId);
     }
 }

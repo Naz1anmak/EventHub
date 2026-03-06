@@ -11,7 +11,7 @@ import ru.practicum.eventhub.domain.service.CategoryService;
 
 @Service
 @RequiredArgsConstructor
-public class CategoryApplicationService {
+public class CategoryPageMapper {
     private final CategoryService categoryService;
 
     public PageOfCategories getCategories(Pageable pageable) {

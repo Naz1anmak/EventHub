@@ -15,8 +15,9 @@ import ru.practicum.eventhub.api.dto.response.TagDto;
 import ru.practicum.eventhub.api.dto.response.TagWithStatsDto;
 import ru.practicum.eventhub.api.model.PageOfEvents;
 import ru.practicum.eventhub.api.model.PageOfTags;
-import ru.practicum.eventhub.application.openapi.EventApplicationService;
-import ru.practicum.eventhub.application.openapi.TagApplicationService;
+import ru.practicum.eventhub.application.openapi.EventPageMapper;
+import ru.practicum.eventhub.application.openapi.TagPageMapper;
+import ru.practicum.eventhub.application.saga.TagAnalyticsSagaOrchestrator;
 import ru.practicum.eventhub.domain.service.EventService;
 import ru.practicum.eventhub.domain.service.TagService;
 
@@ -25,17 +26,18 @@ import java.util.UUID;
 @RestController
 @RequiredArgsConstructor
 public class EventTagController implements EventsApi {
-    private final EventApplicationService eventApplicationService;
-    private final TagApplicationService tagApplicationService;
+    private final EventPageMapper eventPageMapper;
+    private final TagPageMapper tagPageMapper;
     private final EventService eventService;
     private final TagService tagService;
+    private final TagAnalyticsSagaOrchestrator tagSagaOrchestrator;
 
     @Override
-    public ResponseEntity<TagDto> addTagToEvent(UUID eventId, UUID tagId) {
-        TagDto tagDto = tagService.addTagToEvent(eventId, tagId);
+    public ResponseEntity<TagWithStatsDto> addTagToEvent(UUID eventId, UUID tagId) {
+        TagWithStatsDto tagWithStatsDto = tagSagaOrchestrator.addTagToEvent(eventId, tagId);
         return ResponseEntity
                 .status(HttpStatus.CREATED)
-                .body(tagDto);
+                .body(tagWithStatsDto);
     }
 
     @Override
@@ -86,7 +88,7 @@ public class EventTagController implements EventsApi {
 
     @Override
     public ResponseEntity<PageOfEvents> getEvents(Integer page, Integer size) {
-        PageOfEvents pageOfEvents = eventApplicationService.getEvents(PageRequest.of(page, size));
+        PageOfEvents pageOfEvents = eventPageMapper.getEvents(PageRequest.of(page, size));
         return ResponseEntity.ok(pageOfEvents);
     }
 
@@ -98,13 +100,13 @@ public class EventTagController implements EventsApi {
 
     @Override
     public ResponseEntity<PageOfTags> getTags(Integer page, Integer size) {
-        PageOfTags pageOfTags = tagApplicationService.getTags(PageRequest.of(page, size));
+        PageOfTags pageOfTags = tagPageMapper.getTags(PageRequest.of(page, size));
         return ResponseEntity.ok(pageOfTags);
     }
 
     @Override
     public ResponseEntity<PageOfTags> getTagsByEventId(UUID eventId, Integer page, Integer size) {
-        PageOfTags pageOfTags = tagApplicationService.getTagsByEvent(eventId, PageRequest.of(page, size));
+        PageOfTags pageOfTags = tagPageMapper.getTagsByEvent(eventId, PageRequest.of(page, size));
         return ResponseEntity.ok(pageOfTags);
     }
 

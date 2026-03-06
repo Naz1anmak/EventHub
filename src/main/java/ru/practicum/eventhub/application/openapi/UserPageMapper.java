@@ -11,7 +11,7 @@ import ru.practicum.eventhub.domain.service.UserService;
 
 @Service
 @RequiredArgsConstructor
-public class UserApplicationService {
+public class UserPageMapper {
     private final UserService userService;
 
     public PageOfUsers getUsers(Pageable pageable) {

@@ -13,7 +13,7 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
-public class TagApplicationService {
+public class TagPageMapper {
     private final TagService tagService;
 
     public PageOfTags getTags(Pageable pageable) {

@@ -7,6 +7,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionTemplate;
 import ru.practicum.eventhub.api.dto.request.EventCreateDto;
 import ru.practicum.eventhub.api.dto.request.EventUpdateDto;
 import ru.practicum.eventhub.api.dto.response.EventDto;
@@ -22,6 +23,7 @@ import ru.practicum.eventhub.domain.util.PageValidator;
 import ru.practicum.eventhub.domain.validation.EventValidationService;
 import ru.practicum.eventhub.infrastructure.redis.ManyToManyCacheIndexService;
 
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -39,6 +41,7 @@ public class EventServiceImpl implements EventService {
     private final EventCacheService eventCacheService;
     private final ManyToManyCacheIndexService relationIndexService;
     private final TagCacheService tagCacheService;
+    private final TransactionTemplate transactionTemplate;
 
     @Override
     @Transactional
@@ -72,26 +75,29 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    @Transactional
     public EventDto updateEvent(UUID id, EventUpdateDto dto) {
-        Event event = eventReadService.findByIdForUpdate(id);
+        Map.Entry<Event, Set<UUID>> result = transactionTemplate.execute(status -> {
+            Event eventEntity = eventReadService.findByIdForUpdate(id);
 
-        eventValidationService.validateUpdate(dto);
+            eventValidationService.validateUpdate(dto);
 
-        Set<UUID> oldTagIds = event.getTags().stream().map(Tag::getId).collect(Collectors.toSet());
-        event = eventMapper.updateEventFromDto(dto, event);
-        event = eventRepository.save(event);
+            Set<UUID> oldTagIds = eventEntity.getTags().stream().map(Tag::getId).collect(Collectors.toSet());
+            eventEntity = eventMapper.updateEventFromDto(dto, eventEntity);
+            eventEntity = eventRepository.save(eventEntity);
 
-        Set<UUID> addedTagIds = event.getTags().stream().map(Tag::getId).collect(Collectors.toSet());
-        addedTagIds.removeAll(oldTagIds);
+            Set<UUID> addedTagIds = eventEntity.getTags().stream().map(Tag::getId).collect(Collectors.toSet());
+            addedTagIds.removeAll(oldTagIds);
+            return Map.entry(eventEntity, addedTagIds);
+        });
+
+        Event event = result.getKey();
+        Set<UUID> addedTagIds = result.getValue();
 
         for (UUID tagId : addedTagIds) {
             relationIndexService.add(EVENT_TAG_RELATION, id, tagId);
         }
         eventCacheService.refresh(id);
-        for (UUID tagId : addedTagIds) {
-            tagCacheService.refreshByEvent(id, tagId);
-        }
+        tagCacheService.refreshByEventBatch(id, addedTagIds);
 
         log.info("Обновлено событие с id={}", id);
         return eventMapper.toDto(event);

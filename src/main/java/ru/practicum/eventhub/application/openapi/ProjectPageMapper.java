@@ -13,7 +13,7 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
-public class ProjectApplicationService {
+public class ProjectPageMapper {
     private final ProjectService projectService;
 
     public PageOfProjects getProjectsByCategory(UUID categoryId, Pageable pageable) {

@@ -11,7 +11,7 @@ import ru.practicum.eventhub.domain.service.UserMetadataService;
 
 @Service
 @RequiredArgsConstructor
-public class MetadataApplicationService {
+public class MetadataPageMapper {
     private final UserMetadataService userMetadataService;
 
     public PageOfMetadata getUserMetadata(Pageable pageable) {

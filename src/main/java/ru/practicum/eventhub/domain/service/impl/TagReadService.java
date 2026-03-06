@@ -9,6 +9,8 @@ import ru.practicum.eventhub.api.exception.ConflictException;
 import ru.practicum.eventhub.domain.model.Tag;
 import ru.practicum.eventhub.domain.repository.TagRepository;
 
+import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 @Slf4j
@@ -31,6 +33,11 @@ public class TagReadService {
             log.error("Тег с id={} для события с id={} не найден", tagId, eventId);
             return new EntityNotFoundException("Тег с id=" + tagId + " для события с id=" + eventId + " не найден");
         });
+    }
+
+    @Transactional(readOnly = true)
+    public List<Tag> findAllByIdInAndEventsId(Set<UUID> tagIds, UUID eventId) {
+        return tagRepository.findAllByIdInAndEventsId(tagIds, eventId);
     }
 
     @Transactional(readOnly = true)

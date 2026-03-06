@@ -6,13 +6,14 @@ import ru.practicum.eventhub.api.dto.request.TagUpdateDto;
 import ru.practicum.eventhub.api.dto.response.TagDto;
 import ru.practicum.eventhub.api.dto.response.TagWithStatsDto;
 import ru.practicum.eventhub.domain.dto.PagedResponse;
+import ru.practicum.eventhub.domain.model.Tag;
 
 import java.util.UUID;
 
 public interface TagService {
     TagDto createTag(TagCreateDto dto);
 
-    TagDto addTagToEvent(UUID eventId, UUID tagId);
+    Tag addTagLocal(UUID eventId, UUID tagId);
 
     PagedResponse<TagDto> getTags(Pageable pageable);
 
@@ -25,4 +26,8 @@ public interface TagService {
     void deleteForEvent(UUID eventId, UUID tagId);
 
     void deleteTag(UUID tagId);
+
+    void cacheRefreshAfterAddTag(UUID eventId, UUID tagId);
+
+    void removeTagLocal(UUID eventId, UUID tagId);
 }

@@ -1090,7 +1090,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/TagDto'
+                $ref: '#/components/schemas/TagWithStatsDto'
         '400':
           description: Некорректные данные запроса
           content:

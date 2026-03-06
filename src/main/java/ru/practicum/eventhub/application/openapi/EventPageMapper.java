@@ -11,7 +11,7 @@ import ru.practicum.eventhub.domain.service.EventService;
 
 @Service
 @RequiredArgsConstructor
-public class EventApplicationService {
+public class EventPageMapper {
     private final EventService eventService;
 
     public PageOfEvents getEvents(Pageable pageable) {

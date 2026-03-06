@@ -7,7 +7,9 @@ import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import ru.practicum.eventhub.domain.model.Tag;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 public interface TagRepository extends JpaRepository<Tag, UUID> {
@@ -24,4 +26,6 @@ public interface TagRepository extends JpaRepository<Tag, UUID> {
     boolean existsByName(String name);
 
     boolean existsByIdAndEventsId(UUID tagId, UUID eventId);
+
+    List<Tag> findAllByIdInAndEventsId(Set<UUID> tagIds, UUID eventId);
 }
