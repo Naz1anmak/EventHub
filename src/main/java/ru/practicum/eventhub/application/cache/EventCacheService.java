@@ -2,8 +2,6 @@ package ru.practicum.eventhub.application.cache;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.cache.Cache;
-import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.stereotype.Component;
 import ru.practicum.eventhub.api.dto.response.EventDto;
@@ -19,7 +17,6 @@ import java.util.UUID;
 public class EventCacheService {
     private final EventReadService eventReadService;
     private final EventMapper eventMapper;
-    private final CacheManager cacheManager;
 
     @CachePut(value = "events", key = "#eventId")
     public EventDto refresh(UUID eventId) {
@@ -27,13 +24,4 @@ public class EventCacheService {
         log.info("Обновлен кэш события с id={}", eventId);
         return eventMapper.toDto(event);
     }
-
-    public void evict(UUID eventId) {
-        Cache cache = cacheManager.getCache("events");
-        if (cache != null) {
-            cache.evict(eventId);
-            log.info("Удален кэш события с id={}", eventId);
-        }
-    }
 }
-

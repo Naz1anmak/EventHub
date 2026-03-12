@@ -2,6 +2,8 @@ package ru.practicum.eventhub.domain.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -12,7 +14,6 @@ import ru.practicum.eventhub.api.dto.request.EventCreateDto;
 import ru.practicum.eventhub.api.dto.request.EventUpdateDto;
 import ru.practicum.eventhub.api.dto.response.EventDto;
 import ru.practicum.eventhub.api.mapper.EventMapper;
-import ru.practicum.eventhub.application.cache.EventCacheService;
 import ru.practicum.eventhub.application.cache.TagCacheService;
 import ru.practicum.eventhub.domain.dto.PagedResponse;
 import ru.practicum.eventhub.domain.model.Event;
@@ -38,7 +39,6 @@ public class EventServiceImpl implements EventService {
     private final EventReadService eventReadService;
     private final EventMapper eventMapper;
     private final EventValidationService eventValidationService;
-    private final EventCacheService eventCacheService;
     private final ManyToManyCacheIndexService relationIndexService;
     private final TagCacheService tagCacheService;
     private final TransactionTemplate transactionTemplate;
@@ -75,6 +75,7 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
+    @CachePut(value = "events", key = "#id")
     public EventDto updateEvent(UUID id, EventUpdateDto dto) {
         Map.Entry<Event, Set<UUID>> result = transactionTemplate.execute(status -> {
             Event eventEntity = eventReadService.findByIdForUpdate(id);
@@ -96,7 +97,6 @@ public class EventServiceImpl implements EventService {
         for (UUID tagId : addedTagIds) {
             relationIndexService.add(EVENT_TAG_RELATION, id, tagId);
         }
-        eventCacheService.refresh(id);
         tagCacheService.refreshByEventBatch(id, addedTagIds);
 
         log.info("Обновлено событие с id={}", id);
@@ -105,13 +105,12 @@ public class EventServiceImpl implements EventService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "events", key = "#id")
     public void deleteEvent(UUID id) {
         eventReadService.findById(id);
         eventRepository.deleteById(id);
 
         relationIndexService.deleteLeft(EVENT_TAG_RELATION, id);
-
-        eventCacheService.evict(id);
 
         log.info("Удалено событие с id={}", id);
     }

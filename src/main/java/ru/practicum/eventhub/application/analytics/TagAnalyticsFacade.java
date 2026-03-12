@@ -16,8 +16,8 @@ public class TagAnalyticsFacade {
     private final TagAnalyticsClient tagAnalyticsClient;
 
     @Retry(name = "tag-analytics")
-    public TagStatsDto sendAnalytics(UUID tagId) {
-        return tagAnalyticsClient.createIfAbsent(tagId);
+    public TagStatsDto incrementUsage(UUID tagId) {
+        return tagAnalyticsClient.incrementUsage(tagId);
     }
 
     @Retry(name = "tag-analytics")

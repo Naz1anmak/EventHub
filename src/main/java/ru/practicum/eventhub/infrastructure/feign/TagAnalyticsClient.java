@@ -19,7 +19,7 @@ import java.util.UUID;
 public interface TagAnalyticsClient {
 
     @PostMapping("/api/v1/tags/{id}/used")
-    TagStatsDto createIfAbsent(@PathVariable UUID id);
+    TagStatsDto incrementUsage(@PathVariable UUID id);
 
     @GetMapping("/api/v1/tags/{id}/stats")
     TagStatsDto getTagStats(@PathVariable UUID id);

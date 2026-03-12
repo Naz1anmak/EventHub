@@ -22,14 +22,14 @@ public class TagAnalyticsSagaOrchestrator {
 
     public TagWithStatsDto addTagToEvent(UUID eventId, UUID tagId) {
         boolean tagAdded = false;
-        boolean analyticsCreated = false;
+        boolean incrementUsage = false;
 
         try {
             Tag tag = tagService.addTagLocal(eventId, tagId);
             tagAdded = true;
 
-            TagStatsDto tagStatsDto = analyticsFacade.sendAnalytics(tagId);
-            analyticsCreated = true;
+            TagStatsDto tagStatsDto = analyticsFacade.incrementUsage(tagId);
+            incrementUsage = true;
 
             tagService.cacheRefreshAfterAddTag(eventId, tagId);
 
@@ -39,7 +39,7 @@ public class TagAnalyticsSagaOrchestrator {
         } catch (Exception ex) {
             log.error("Ошибка при добавлении тега с id={} к событию с id={}: {}", tagId, eventId, ex.getMessage());
 
-            if (analyticsCreated) {
+            if (incrementUsage) {
                 analyticsFacade.delete(tagId);
             }
 

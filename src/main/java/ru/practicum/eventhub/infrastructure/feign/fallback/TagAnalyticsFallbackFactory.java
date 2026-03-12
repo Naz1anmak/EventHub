@@ -30,7 +30,7 @@ public class TagAnalyticsFallbackFactory implements FallbackFactory<TagAnalytics
         }
 
         @Override
-        public TagStatsDto createIfAbsent(UUID id) {
+        public TagStatsDto incrementUsage(UUID id) {
             if (cause instanceof TagNotFoundException) {
                 log.debug("Тег с id={} не найден в Tag Analytics (404). Пропускаем создание статистики.", id);
                 throw (TagNotFoundException) cause;
@@ -43,14 +43,14 @@ public class TagAnalyticsFallbackFactory implements FallbackFactory<TagAnalytics
 
             log.warn("Сервис Tag Analytics недоступен. Не удалось создать статистику для тега с id={}. " +
                     "Причина: {}", id, cause.getClass().getSimpleName(), cause);
-            return new TagStatsDto(null);
+            return new TagStatsDto(0, null, null);
         }
 
         @Override
         public TagStatsDto getTagStats(UUID id) {
             if (cause instanceof TagNotFoundException) {
                 log.debug("Тег с id={} не найден в Tag Analytics (404). Возвращаем пустую статистику.", id);
-                return new TagStatsDto(null);
+                return new TagStatsDto(0, null, null);
             }
 
             if (cause instanceof TagAnalyticsClientException) {
@@ -60,7 +60,7 @@ public class TagAnalyticsFallbackFactory implements FallbackFactory<TagAnalytics
 
             log.warn("Сервис Tag Analytics недоступен. Не удалось получить статистику для тега с id={}. " +
                     "Причина: {}", id, cause.getClass().getSimpleName(), cause);
-            return new TagStatsDto(null);
+            return new TagStatsDto(0, null, null);
         }
 
         @Override
