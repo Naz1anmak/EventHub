@@ -5,8 +5,8 @@ import ru.practicum.eventhub.api.dto.request.CategoryCreateDto;
 import ru.practicum.eventhub.api.dto.request.CategoryUpdateDto;
 import ru.practicum.eventhub.api.dto.request.ProjectCreateDto;
 import ru.practicum.eventhub.api.dto.response.CategoryDto;
-import ru.practicum.eventhub.domain.model.Category;
-import ru.practicum.eventhub.domain.model.Project;
+import ru.practicum.eventhub.model.Category;
+import ru.practicum.eventhub.model.Project;
 
 import java.util.Set;
 

@@ -1090,7 +1090,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/TagDto'
+                $ref: '#/components/schemas/TagWithStatsDto'
         '400':
           description: Некорректные данные запроса
           content:
@@ -1139,7 +1139,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/TagDto'
+                $ref: '#/components/schemas/TagWithStatsDto'
         '400':
           description: Некорректный id
           content:
@@ -1488,15 +1488,6 @@ components:
           format: uuid
           description: Идентификатор пользователя
           example: "a1234567-89ab-cdef-0123-456789abcdef"
-        username:
-          type: string
-          description: Имя пользователя
-          example: "ivan.petrov"
-        email:
-          type: string
-          format: email
-          description: Email пользователя
-          example: "ivan.petrov@example.com"
 
     UserMetadataDto:
       type: object
@@ -1575,10 +1566,6 @@ components:
           format: uuid
           description: Идентификатор категории
           example: "b1a7e8c2-3d4f-4e2a-9c1a-2b3c4d5e6f7a"
-        name:
-          type: string
-          description: Название категории
-          example: "Технологии"
 
     ProjectDto:
       type: object
@@ -1617,10 +1604,6 @@ components:
           format: uuid
           description: Идентификатор проекта
           example: "e1f2a3b4-5678-1234-abcd-9876543210ab"
-        name:
-          type: string
-          description: Название проекта
-          example: "EventHub"
 
     EventDto:
       type: object
@@ -1671,10 +1654,6 @@ components:
           format: uuid
           description: Идентификатор события
           example: "b1a7e8c2-3d4f-4e2a-9c1a-2b3c4d5e6f7a"
-        title:
-          type: string
-          description: Название события
-          example: "Митап по Java"
 
     TagDto:
       type: object
@@ -1698,7 +1677,16 @@ components:
           items:
             $ref: '#/components/schemas/EventShortDto'
 
-    TagShortDto:
+    TagStatsDto:
+      type: object
+      properties:
+        createdAt:
+          type: string
+          format: date-time
+          description: Дата и время добавления тега к событию
+          example: "2025-11-05T15:30:00+03:00"
+
+    TagWithStatsDto:
       type: object
       properties:
         id:
@@ -1710,13 +1698,33 @@ components:
           type: string
           description: Название тега
           example: "Java"
+        description:
+          type: string
+          description: Описание тега
+          example: "Тег для событий, связанных с Java."
+        events:
+          type: array
+          description: Список событий с этим тегом
+          items:
+            $ref: '#/components/schemas/EventShortDto'
+        stats:
+          $ref: '#/components/schemas/TagStatsDto'
+
+    TagShortDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Идентификатор тега
+          example: "c1d2e3f4-5678-1234-abcd-9876543210ab"
 
     PageMeta:
       type: object
       properties:
-        page:
+        pageNumber:
           type: integer
-        size:
+        pageSize:
           type: integer
         totalElements:
           type: integer

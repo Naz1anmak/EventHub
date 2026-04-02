@@ -5,8 +5,8 @@ import ru.practicum.eventhub.api.dto.request.EventCreateDto;
 import ru.practicum.eventhub.api.dto.request.EventUpdateDto;
 import ru.practicum.eventhub.api.dto.request.TagCreateDto;
 import ru.practicum.eventhub.api.dto.response.EventDto;
-import ru.practicum.eventhub.domain.model.Event;
-import ru.practicum.eventhub.domain.model.Tag;
+import ru.practicum.eventhub.model.Event;
+import ru.practicum.eventhub.model.Tag;
 
 import java.util.Set;
 

@@ -12,6 +12,6 @@ public record TagDto(
         String description,
         List<EventShortDto> events
 ) {
-    public record EventShortDto(UUID id, String title) {
+    public record EventShortDto(UUID id) {
     }
 }

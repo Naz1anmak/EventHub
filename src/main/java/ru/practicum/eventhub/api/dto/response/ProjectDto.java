@@ -14,6 +14,6 @@ public record ProjectDto(
         OffsetDateTime updatedAt,
         CategoryShortDto category
 ) {
-    public record CategoryShortDto(UUID id, String name) {
+    public record CategoryShortDto(UUID id) {
     }
 }

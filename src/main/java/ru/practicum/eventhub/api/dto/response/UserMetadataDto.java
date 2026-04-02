@@ -16,6 +16,6 @@ public record UserMetadataDto(
         OffsetDateTime createdAt,
         OffsetDateTime updatedAt
 ) {
-    public record UserShortDto(UUID id, String username, String email) {
+    public record UserShortDto(UUID id) {
     }
 }
