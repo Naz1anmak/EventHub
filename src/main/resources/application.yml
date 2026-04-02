@@ -52,8 +52,8 @@ resilience4j:
         enableRandomizedWait: true
         randomizedWaitFactor: 0.5
         ignoreExceptions:
-          - ru.practicum.eventhub.infrastructure.feign.exception.TagAnalyticsClientException
-          - ru.practicum.eventhub.infrastructure.feign.exception.TagNotFoundException
+          - ru.practicum.eventhub.config.feign.exception.TagAnalyticsClientException
+          - ru.practicum.eventhub.config.feign.exception.TagNotFoundException
 
 services:
   tag-analytics:

@@ -1,4 +1,5 @@
 -- Добавление ON UPDATE CASCADE для всех внешних ключей с ON DELETE CASCADE
+-- Создание таблицы compensation_actions для хранения информации о компенсационных действиях
 
 -- 1. projects.category_id: изменение с RESTRICT на CASCADE с обновлением
 alter table projects drop constraint if exists projects_category_id_fkey;
@@ -35,3 +36,12 @@ alter table event_tags
   references tags(id)
   on delete cascade
   on update cascade;
+
+CREATE TABLE compensation_actions (
+    id UUID PRIMARY KEY default gen_random_uuid(),
+    action_type VARCHAR(50) NOT NULL,
+    payload TEXT NOT NULL,
+    retries INT DEFAULT 0,
+    last_attempt timestamptz,
+    created_at timestamptz not null default now()
+);

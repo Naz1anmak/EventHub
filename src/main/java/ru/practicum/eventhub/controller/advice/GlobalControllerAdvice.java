@@ -21,8 +21,8 @@ import ru.practicum.eventhub.api.exception.BadRequestException;
 import ru.practicum.eventhub.api.exception.ConflictException;
 import ru.practicum.eventhub.api.exception.ErrorResponse;
 import ru.practicum.eventhub.api.exception.ForbiddenException;
-import ru.practicum.eventhub.infrastructure.feign.exception.TagAnalyticsClientException;
-import ru.practicum.eventhub.infrastructure.feign.exception.TagNotFoundException;
+import ru.practicum.eventhub.config.feign.exception.TagAnalyticsClientException;
+import ru.practicum.eventhub.config.feign.exception.TagNotFoundException;
 
 import java.util.stream.Collectors;
 

@@ -12,18 +12,14 @@ import ru.practicum.eventhub.api.dto.response.UserDto;
 import ru.practicum.eventhub.api.dto.response.UserMetadataDto;
 import ru.practicum.eventhub.api.model.PageOfMetadata;
 import ru.practicum.eventhub.api.model.PageOfUsers;
-import ru.practicum.eventhub.application.openapi.MetadataPageMapper;
-import ru.practicum.eventhub.application.openapi.UserPageMapper;
-import ru.practicum.eventhub.domain.service.UserMetadataService;
-import ru.practicum.eventhub.domain.service.UserService;
+import ru.practicum.eventhub.service.UserMetadataService;
+import ru.practicum.eventhub.service.UserService;
 
 import java.util.UUID;
 
 @RestController
 @RequiredArgsConstructor
 public class UserController implements UsersApi {
-    private final UserPageMapper userPageMapper;
-    private final MetadataPageMapper metadataPageMapper;
     private final UserService userService;
     private final UserMetadataService userMetadataService;
 
@@ -51,7 +47,7 @@ public class UserController implements UsersApi {
 
     @Override
     public ResponseEntity<PageOfMetadata> getUserMetadata(Integer page, Integer size) {
-        PageOfMetadata pageOfUsers = metadataPageMapper.getUserMetadata(PageRequest.of(page, size));
+        PageOfMetadata pageOfUsers = userMetadataService.getUserMetadata(PageRequest.of(page, size));
         return ResponseEntity.ok(pageOfUsers);
     }
 
@@ -63,7 +59,7 @@ public class UserController implements UsersApi {
 
     @Override
     public ResponseEntity<PageOfUsers> getUsers(Integer page, Integer size) {
-        PageOfUsers pageOfUsers = userPageMapper.getUsers(PageRequest.of(page, size));
+        PageOfUsers pageOfUsers = userService.getUsers(PageRequest.of(page, size));
         return ResponseEntity.ok(pageOfUsers);
     }
 

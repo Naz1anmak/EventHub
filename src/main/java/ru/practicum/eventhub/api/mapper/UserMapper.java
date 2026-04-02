@@ -6,8 +6,8 @@ import ru.practicum.eventhub.api.dto.request.UserMetadataCreateDto;
 import ru.practicum.eventhub.api.dto.request.UserMetadataUpdateDto;
 import ru.practicum.eventhub.api.dto.request.UserUpdateDto;
 import ru.practicum.eventhub.api.dto.response.UserDto;
-import ru.practicum.eventhub.domain.model.User;
-import ru.practicum.eventhub.domain.model.UserMetadata;
+import ru.practicum.eventhub.model.User;
+import ru.practicum.eventhub.model.UserMetadata;
 
 import static org.mapstruct.MappingConstants.ComponentModel.SPRING;
 import static org.mapstruct.NullValuePropertyMappingStrategy.IGNORE;
